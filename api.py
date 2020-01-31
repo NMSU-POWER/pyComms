@@ -28,7 +28,7 @@ def home():
 @app.route('/<page>', methods=['GET', 'POST'])
 def search_page(page):
     try:
-        f = open('html/'+page, 'r').read()
+        f = open('html/' + page, 'r').read()
         return f
     except FileNotFoundError:
         flask.abort(404)
@@ -38,7 +38,7 @@ def search_page(page):
 @app.route('/register', methods=['POST'])
 def register():
     pis[request.remote_addr] = {'timeStamp': time.localtime(), 'volts': request.args['volts'],
-                                      'power': request.args['power']}
+                                'power': request.args['power']}
     print(pis)
     return pis[request.remote_addr]
 
@@ -50,7 +50,7 @@ def get_info():
     neighbors = {}
     bad = []
     current_time = time.localtime()
-    for neighbor in pis:
+    for neighbor in pis.keys():
         # First, ensure neighbors are < 15 minutes old, if they aren't remove them from the neighbor list
         if time.mktime(current_time) - time.mktime(pis[neighbor]['timeStamp']) <= 15 * 60 and \
                 neighbor != request.remote_addr:
@@ -62,7 +62,7 @@ def get_info():
 
     # Remove stale Pis
     for old in bad:
-        del(pis[old])
+        del (pis[old])
 
     # Return valid neighbors
     return neighbors
