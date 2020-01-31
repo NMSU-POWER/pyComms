@@ -52,7 +52,7 @@ def get_info():
     current_time = time.localtime()
     for neighbor in pis:
         # First, ensure neighbors are < 15 minutes old, if they aren't remove them from the neighbor list
-        if time.mktime(current_time) - time.mktime(pis[neighbor]['timeStamp']) <= 15 and \
+        if time.mktime(current_time) - time.mktime(pis[neighbor]['timeStamp']) <= 15 * 60 and \
                 neighbor != request.remote_addr:
             neighbors[hashlib.sha512(neighbor.encode('utf-8')).hexdigest()] = {'volts': pis[neighbor]['volts'],
                                                                                'power': pis[neighbor]['power']}
