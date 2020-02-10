@@ -14,9 +14,11 @@ myPower = random.randint(100, 1000)
 
 print(myVolts, myPower)
 
-while(1):
-    response = requests.post('http://172.24.61.209:5000/register', params={'volts': myVolts, 'power': myPower})
-    response = requests.get('http://172.24.61.209:5000/get_neighbor_volts_power')
+while 1:
+    response = requests.post('http://10.0.0.2:5000/register', params={'volts': myVolts, 'power': myPower})
+    #if response.status_code != '200':
+    #    exit('-1')
+    response = requests.get('http://10.0.0.2:5000/get_neighbor_volts_power')
     piList = response.content
     print(piList)
     time.sleep(30)

@@ -69,5 +69,5 @@ def get_info():
 
 
 # Run the server with a wsgi host on whatever our IP is
-server = pywsgi.WSGIServer(('172.24.61.209', 5000), app)
+server = pywsgi.WSGIServer(('10.0.0.2', 5000), app)
 server.serve_forever()
