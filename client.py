@@ -21,4 +21,4 @@ while 1:
     response = requests.get('http://10.0.0.2:5000/get_neighbor_volts_power')
     piList = response.content
     print(piList)
-    time.sleep(30)
+    time.sleep(1)
