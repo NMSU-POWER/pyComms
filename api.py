@@ -11,6 +11,9 @@ import time
 import gevent.pywsgi as pywsgi
 import hashlib
 
+from admittance import Admittance
+from gauss import Gauss
+
 # Create a basic application through flask
 app = flask.Flask(__name__)
 # This will hold a list of active pys
@@ -69,5 +72,5 @@ def get_info():
 
 
 # Run the server with a wsgi host on whatever our IP is
-server = pywsgi.WSGIServer(('10.0.0.2', 5000), app)
+server = pywsgi.WSGIServer(('10.0.0.10', 5000), app)
 server.serve_forever()
