@@ -9,11 +9,7 @@
 class Node:
     def __init__(self, neighborV, neighborY, selfV, selfS):
         self.neighborV = neighborV
-        if type(neighborV) == list:
-            self.neighborDelta = [0] * len(self.neighborV)
-        else:
-            self.neighborDelta = 0
-        print(self.neighborDelta)
+        self.neighborDelta = [0] * len(self.neighborV)
         self.neighborY = neighborY
         self.selfV = selfV
         self.selfS = selfS
