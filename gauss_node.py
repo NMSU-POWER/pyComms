@@ -17,5 +17,7 @@ class Node:
     def gauss_iter(self):
         # Step one, what is the power with the current angles?
         S_current = 0
-        for i in len(self.neighborV):
-            print(i)
+        # Step 1:
+        for i in range(len(self.neighborV)):
+            S_current -= self.selfV * (self.neighborV[i] * self.neighborY[i])
+        print(S_current)
