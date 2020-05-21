@@ -7,7 +7,7 @@
 
 
 class Node:
-    def __init__(self, neighborV, neighborY, selfV, selfS):
+    def __init__(self, selfV, selfS, neighborV, neighborY):
         self.neighborV = neighborV
         self.neighborDelta = [0] * len(self.neighborV)
         self.neighborY = neighborY
