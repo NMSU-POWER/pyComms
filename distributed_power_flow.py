@@ -13,3 +13,5 @@ Node3 = Node(.8975, 50, [.9826], [-45.15+30.77j])
 Node4 = Node(.8975, 50, [.9826], [-45.15+30.77j])
 
 Node1.gauss_iter()
+Node1.gauss_iter()
+Node1.angle_iter()

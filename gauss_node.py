@@ -7,6 +7,7 @@
 
 import numpy as np
 import math
+import cmath
 
 
 class Node:
@@ -33,7 +34,20 @@ class Node:
         print(Yself)
         V_current = np.conj(self.selfS)/self.selfV/Yself
         sums = 0
-        for v,y in zip(self.neighborV, self.neighborY):
-            sums -= y*v
+        for v,y,d in zip(self.neighborV, self.neighborY, self.neighborDelta):
+            sums -= y*v*(math.cos(d) + math.sin(d) * 1j)
         V_current += sums/Yself
         print(V_current)
+        self.neighborDelta = [cmath.phase(V_current)]
+        print(self.neighborDelta)
+
+    def angle_iter(self):
+        for i in np.linspace(math.radians(-30), math.radians(30), 10000):
+            print(math.degrees(i))
+            Yself = -1 * sum(self.neighborY)
+            V_current = np.conj(self.selfS) / self.selfV / Yself
+            sums = 0
+            for v, y in zip(self.neighborV, self.neighborY):
+                sums -= y * v * (math.cos(i) + math.sin(i) * 1j)
+            V_current += sums / Yself
+            print(V_current)
