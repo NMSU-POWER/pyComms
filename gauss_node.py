@@ -18,6 +18,19 @@ class Node:
         self.selfV = selfV
         self.selfS = selfS
 
+    def gauss_voltage(self):
+        Yself = -1 * sum(self.neighborY)
+        # Below only correct when self angle = 0
+        V_current = np.conj(self.selfS) / self.selfV / Yself
+        sums = 0
+        for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
+            sums -= y * v * (math.cos(d) + math.sin(d) * 1j)
+        V_current += sums / Yself
+        print(np.abs(V_current))
+        self.selfV = np.abs(V_current)
+        # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
+        self.neighborDelta = [cmath.phase(V_current)]
+
     def gauss_iter(self):
         # Step one, what is the power with the current angles?
         S_current = 0
@@ -34,7 +47,7 @@ class Node:
         print(Yself)
         V_current = np.conj(self.selfS)/self.selfV/Yself
         sums = 0
-        for v,y,d in zip(self.neighborV, self.neighborY, self.neighborDelta):
+        for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
             sums -= y*v*(math.cos(d) + math.sin(d) * 1j)
         V_current += sums/Yself
         print(V_current)
