@@ -31,6 +31,13 @@ class Node:
         # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
         self.neighborDelta = [cmath.phase(V_current)]
 
+    def angle_calculation(self):
+        Yself = -1 * sum(self.neighborY)
+        phasor = (np.conj(self.selfS) / self.selfV - self.selfV * Yself) / self.neighborV[0] / self.neighborY[0]
+        print(phasor)
+        delta = cmath.phase(phasor) * 360 / 2 / math.pi
+        print(delta)
+
     def gauss_iter(self):
         # Step one, what is the power with the current angles?
         S_current = 0
