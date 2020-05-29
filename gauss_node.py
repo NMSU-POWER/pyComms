@@ -21,22 +21,23 @@ class Node:
     def gauss_voltage(self):
         Yself = -1 * sum(self.neighborY)
         # Below only correct when self angle = 0
-        V_current = np.conj(self.selfS) / self.selfV / Yself
+        V_current = np.conj(self.selfS) / self.selfV
         sums = 0
         for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
             sums -= y * v * (math.cos(d) + math.sin(d) * 1j)
-        V_current += sums / Yself
+        V_current += sums
+        V_current /= Yself
+        print(V_current)
         print(np.abs(V_current))
-        self.selfV = np.abs(V_current)
+        # self.selfV = np.abs(V_current)
         # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
-        self.neighborDelta = [cmath.phase(V_current)]
+        # self.neighborDelta = [cmath.phase(V_current)]
 
     def angle_calculation(self):
         Yself = -1 * sum(self.neighborY)
         phasor = (np.conj(self.selfS) / self.selfV - self.selfV * Yself) / self.neighborV[0] / self.neighborY[0]
         print(phasor)
-        delta = cmath.phase(phasor) * 360 / 2 / math.pi
-        print(cmath.phase(phasor))
+        delta = math.degrees(cmath.phase(phasor))
         print(delta)
         return delta
 
