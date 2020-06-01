@@ -36,10 +36,7 @@ class Node:
     def angle_calculation(self):
         Yself = -1 * sum(self.neighborY)
         phasor = (np.conj(self.selfS) / self.selfV - (self.selfV * Yself)) / self.neighborV[0] / self.neighborY[0]
-        print(phasor)
-        print(np.abs(phasor))
         delta = math.degrees(cmath.phase(phasor))
-        print(delta)
         return delta
 
     def gauss_iter(self):

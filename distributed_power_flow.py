@@ -13,6 +13,9 @@ Node2 = Node(.9826, 0, [1, .8975, .8975], [-45.15+30.77j, -45.15+30.77j, -45.15+
 Node3 = Node(.8975, -50, [.9826], [-45.15+30.77j])
 Node4 = Node(.8975, -50, [.9826], [-45.15+30.77j])
 
+# Calculate the next bus angle from bus 1
 delta = Node1.angle_calculation()
-Node1.neighborDelta = [-math.radians(delta)]
-Node1.gauss_voltage()
+# Set bus 1 angle to known
+Node1.neighborDelta = [math.radians(delta)]
+# Set bus 2 to know its own angle
+Node2.selfV = .9826 * (math.cos(math.radians(delta)) + 1j * math.sin(math.radians(delta)))
