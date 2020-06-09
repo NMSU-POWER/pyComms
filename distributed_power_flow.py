@@ -23,8 +23,15 @@ for i in range(100):
     # !! This sets the self, but isn't broadcasting to neighbors, need to broadcast to neighbors
     Node1.gauss_voltage()
     del2 = Node2.gauss_voltage()
+    Node1.neighborDelta = [del2]
     Node2.selfV = Node2.Vmag * (math.cos(del2) + 1j * math.sin(del2))
     del3 = Node3.gauss_voltage()
     Node3.selfV = Node3.Vmag * (math.cos(del3) + 1j * math.sin(del3))
     del4 = Node4.gauss_voltage()
+    Node2.neighborDelta = [0, del3, del4]
     Node4.selfV = Node4.Vmag * (math.cos(del4) + 1j * math.sin(del4))
+    Node3.neighborDelta = [del2]
+    Node4.neighborDelta = [del2]
+
+print(Node1.selfV)
+print(Node2.selfV)
