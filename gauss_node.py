@@ -28,12 +28,19 @@ class Node:
             sums -= y * v * (math.cos(d) + math.sin(d) * 1j)
         V_current += sums
         V_current /= Yself
-        print(V_current)
-        print(np.abs(V_current))
+        # print(V_current)
+        # print(np.abs(V_current))
         return V_current, cmath.phase(V_current)
         # self.selfV = np.abs(V_current)
         # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
         # self.neighborDelta = [cmath.phase(V_current)]
+
+    def power_calc(self):
+        Yself = -1 * sum(self.neighborY)
+        newS = self.selfV * np.conj(self.selfV * Yself)
+        for v,y,d in zip(self.neighborV, self.neighborY, self.neighborDelta):
+            newS += v * (1*math.cos(d) + 1j*math.sin(d)) * np.conj(v * (1*math.cos(d) + 1j*math.sin(d)) * y)
+        self.selfS = newS
 
     def angle_calculation(self):
         Yself = -1 * sum(self.neighborY)
