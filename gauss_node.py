@@ -30,7 +30,7 @@ class Node:
         V_current /= Yself
         print(V_current)
         print(np.abs(V_current))
-        return(cmath.phase(V_current))
+        return V_current, cmath.phase(V_current)
         # self.selfV = np.abs(V_current)
         # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
         # self.neighborDelta = [cmath.phase(V_current)]
