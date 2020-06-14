@@ -19,27 +19,34 @@ class Node:
         self.Vmag = selfV
         self.selfS = selfS
 
+    # gauss_voltage
+    # No input argument, Node contains necessary information
+    # Calculates own voltage based on current state of voltages and power
     def gauss_voltage(self):
+        # Calculate self diagonal admittance
         Yself = -1 * sum(self.neighborY)
+        # Normal Gauss voltage method for a node.
         V_current = np.conj(self.selfS / self.selfV)
         sums = 0
         for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
             sums -= y * v * (math.cos(d) + math.sin(d) * 1j)
         V_current += sums
         V_current /= Yself
-        # print(V_current)
-        # print(np.abs(V_current))
+        # Send this value back to the main function for distribution
         return np.abs(V_current), cmath.phase(V_current)
-        # self.selfV = np.abs(V_current)
-        # Not sure if we need the following if we're worried about magnitude, probably for more than 1 iteration.
-        # self.neighborDelta = [cmath.phase(V_current)]
 
+    # power_calc
+    # No input arguments, Node contains necessary information.
+    # Calculates the power at the node with the current nodal voltage information.
     def power_calc(self):
+        # Calculate self diagonal admittance
         Yself = -1 * sum(self.neighborY)
+        # I = v of each node multiplied by admittance, summation, simplifies where admittance = 0
         I = self.selfV * Yself
         for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
             I += v * (math.cos(d) + 1j*math.sin(d)) * y
         newS = self.selfV * np.conj(I)
+        # New power, based on current voltage information
         self.selfS = newS
 
     def angle_calculation(self):

@@ -7,11 +7,12 @@
 
 from gauss_node import Node
 import math
+import numpy as np
 
-Node1 = Node(1, 0, [1], [-46.15+30.77j])
-Node2 = Node(1, 0, [1, 1, 1], [-46.15+30.77j, -4.615+3.077j, -4.615+3.077j])
-Node3 = Node(1, -.50, [1], [-4.615+3.077j])
-Node4 = Node(1, -.50, [1], [-4.615+3.077j])
+Node1 = Node(1, 0, [.9826], [-46.15+30.77j])
+Node2 = Node(.9826, 0, [1, 1, 1], [-46.15+30.77j, -4.615+3.077j, -4.615+3.077j])
+Node3 = Node(1, -.50, [.9826], [-4.615+3.077j])
+Node4 = Node(1, -.50, [.9826], [-4.615+3.077j])
 
 # Calculate the next bus angle from bus 1
 # delta = Node1.angle_calculation()
@@ -19,6 +20,8 @@ Node4 = Node(1, -.50, [1], [-4.615+3.077j])
 # Node1.neighborDelta = [math.radians(delta)]
 # Set bus 2 to know its own angle
 # Node2.selfV = .9826 * (math.cos(math.radians(delta)) + 1j * math.sin(math.radians(delta)))
+
+# Run a normal set of Gauss iterations, only change is that node calculations are inside the Node class.
 for i in range(200):
     # Run voltage calculation on each bus
     v1, del1 = Node1.gauss_voltage()
