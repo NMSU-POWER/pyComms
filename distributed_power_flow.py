@@ -6,20 +6,19 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from gauss_node import Node
+from gauss_node import shared_info
 import math
 import numpy as np
+
+Node1_share = shared_info([.9826], [-46.15+30.77j])
+Node2_share = shared_info([1, 1, 1], [-46.15+30.77j, -4.615+3.077j, -4.615+3.077j])
+Node3_share = shared_info([.9826], [-4.615+3.077j])
+Node4_share = shared_info([.9826], [-4.615+3.077j])
 
 Node1 = Node(1, 0, [.9826], [-46.15+30.77j])
 Node2 = Node(.9826, 0, [1, 1, 1], [-46.15+30.77j, -4.615+3.077j, -4.615+3.077j])
 Node3 = Node(1, -.50, [.9826], [-4.615+3.077j])
 Node4 = Node(1, -.50, [.9826], [-4.615+3.077j])
-
-# Calculate the next bus angle from bus 1
-# delta = Node1.angle_calculation()
-# Set bus 1 angle to known
-# Node1.neighborDelta = [math.radians(delta)]
-# Set bus 2 to know its own angle
-# Node2.selfV = .9826 * (math.cos(math.radians(delta)) + 1j * math.sin(math.radians(delta)))
 
 # Run a normal set of Gauss iterations, only change is that node calculations are inside the Node class.
 for i in range(200):

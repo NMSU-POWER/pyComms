@@ -10,6 +10,17 @@ import math
 import cmath
 
 
+# shared_info
+# Informational class only to serve as info sharing medium
+class shared_info:
+    def __init__(self, neighborV, neighborY):
+        self.neighborV = neighborV
+        self.neighborY = neighborY
+        self.neighborDelta = [] * len(self.neighborY)
+        # Always start true to kick off Gauss
+        self.changed = True
+
+
 class Node:
     def __init__(self, selfV, selfS, neighborV, neighborY):
         self.neighborV = neighborV
@@ -23,6 +34,12 @@ class Node:
     # shared_info is a class that holds the shared information to this node
     # Run power flow until we hit a stable state, update if values change anywhere
     def node_manager(self, shared_info):
+        last_calc = self.gauss_voltage()
+        # Loop forever, always keep the power flow up to date
+        while True:
+            # Only iterate if there has been a change, or if calculated voltage/power doesn't line up with measured
+            if shared_info.changed == True or last_calc[0] != self.selfV or self.power_calc() != self.selfS:
+                print('here')
         return True
 
     # gauss_voltage
