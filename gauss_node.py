@@ -19,6 +19,12 @@ class Node:
         self.Vmag = selfV
         self.selfS = selfS
 
+    # node_manager
+    # shared_info is a class that holds the shared information to this node
+    # Run power flow until we hit a stable state, update if values change anywhere
+    def node_manager(self, shared_info):
+        return True
+
     # gauss_voltage
     # No input argument, Node contains necessary information
     # Calculates own voltage based on current state of voltages and power
