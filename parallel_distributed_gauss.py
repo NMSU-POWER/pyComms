@@ -10,14 +10,14 @@ from gauss_node import shared_info
 import threading
 
 # Set up the shared information for each node
-Node1_share = shared_info(neighborV=[.9826], neighborY=[-46.15+30.77j], slack=True)
+Node1_share = shared_info(neighborV=[1], neighborY=[-46.15+30.77j], slack=True)
 Node2_share = shared_info(neighborV=[1, 1, 1], neighborY=[-46.15+30.77j, -4.615+3.077j, -4.615+3.077j])
-Node3_share = shared_info(neighborV=[.9826], neighborY=[-4.615+3.077j])
-Node4_share = shared_info(neighborV=[.9826], neighborY=[-4.615+3.077j])
+Node3_share = shared_info(neighborV=[1], neighborY=[-4.615+3.077j])
+Node4_share = shared_info(neighborV=[1], neighborY=[-4.615+3.077j])
 
 # Create the Node objects with shared info object
 Node1 = Node(1, 0, Node1_share)
-Node2 = Node(.9826, 0, Node2_share)
+Node2 = Node(1, 0, Node2_share)
 Node3 = Node(1, -.50, Node3_share)
 Node4 = Node(1, -.50, Node4_share)
 
@@ -45,7 +45,7 @@ try:
         Node3_share.neighborV = [Node2.selfV]
 
         # V4 info
-        Node4_share.neighborV = [Node4.selfV]
+        Node4_share.neighborV = [Node2.selfV]
 
         print('Voltages:')
         print(Node1.selfV)

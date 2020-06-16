@@ -31,7 +31,6 @@ class Node:
     # shared_info is a class that holds the shared information to this node
     # Run power flow until we hit a stable state, update if values change anywhere
     def node_manager(self):
-        last_calc, _ = self.gauss_voltage()
         # Loop forever, always keep the power flow up to date
         while True:
             self.gauss_voltage()
@@ -52,7 +51,8 @@ class Node:
         V_current += sums
         V_current /= Yself
         # Set own, distribution will automate.
-        self.selfV = V_current
+        if not self.neighbors.slack:
+            self.selfV = V_current
 
     # power_calc
     # No input arguments, Node contains necessary information.
