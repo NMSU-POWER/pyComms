@@ -6,26 +6,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import numpy as np
-import math
-import cmath
-
-
-# shared_info
-# Informational class only to serve as info sharing medium
-class shared_info:
-    def __init__(self, neighborV, neighborY, slack=False):
-        self.neighborV = neighborV
-        self.neighborY = neighborY
-        self.slack = slack
-        # Always start true to kick off Gauss
-        self.changed = True
 
 
 class Node:
-    def __init__(self, selfV, selfS, neighbors):
+    def __init__(self, selfV, selfS, lines, slack=False):
         self.selfV = selfV
         self.selfS = selfS
-        self.neighbors = neighbors
+        self.lines = lines
+        self.slack = slack
+        self.selfY = 0
+        for line in self.lines:
+            self.selfY -= line.link(self)
 
     # node_manager
     # shared_info is a class that holds the shared information to this node
@@ -34,36 +25,34 @@ class Node:
         # Loop forever, always keep the power flow up to date
         while True:
             self.gauss_voltage()
-            if self.neighbors.slack:
+            if self.slack:
                 self.power_calc()
 
     # gauss_voltage
     # No input argument, Node contains necessary information
     # Calculates own voltage based on current state of voltages and power
     def gauss_voltage(self):
-        # Calculate self diagonal admittance
-        Yself = -1 * sum(self.neighbors.neighborY)
         # Normal Gauss voltage method for a node.
         V_current = np.conj(self.selfS / self.selfV)
         sums = 0
-        for v, y in zip(self.neighbors.neighborV, self.neighbors.neighborY):
-            sums -= y * v
+        for line in self.lines:
+            node_info = line.volt_admittance_request(self)
+            sums -= node_info[0] * node_info[1]
         V_current += sums
-        V_current /= Yself
+        V_current /= self.selfY
         # Set own, distribution will automate.
-        if not self.neighbors.slack:
+        if not self.slack:
             self.selfV = V_current
 
     # power_calc
     # No input arguments, Node contains necessary information.
     # Calculates the power at the node with the current nodal voltage information.
     def power_calc(self):
-        # Calculate self diagonal admittance
-        Yself = -1 * sum(self.neighbors.neighborY)
         # I = v of each node multiplied by admittance, summation, simplifies where admittance = 0
-        I = self.selfV * Yself
-        for v, y in zip(self.neighbors.neighborV, self.neighbors.neighborY):
-            I += v * y
+        I = self.selfV * self.selfY
+        for line in self.lines:
+            node_info = line.volt_admittance_request(self)
+            I += node_info[0] * node_info[1]
         newS = self.selfV * np.conj(I)
         # New power, based on current voltage information
         self.selfS = newS
