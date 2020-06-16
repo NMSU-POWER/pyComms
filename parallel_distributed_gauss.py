@@ -33,6 +33,8 @@ thread2.start()
 thread3.start()
 thread4.start()
 
+i = 0
+
 try:
     while True:
         # V1 info
@@ -47,6 +49,7 @@ try:
         # V4 info
         Node4_share.neighborV = [Node2.selfV]
 
+        # Print information for user
         print('Voltages:')
         print(Node1.selfV)
         print(Node2.selfV)
@@ -58,6 +61,10 @@ try:
         print(Node3.selfS)
         print(Node4.selfS)
         print('\n')
+
+        i += 1
+        if i == 20:
+            Node3.selfS = -1
 except:
     # exception out of gauss loop, close threads
     thread1.join()
