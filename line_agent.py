@@ -19,10 +19,10 @@ class Line_Agent:
     # input the Node to link to
     # Link this line agent to the input node, intended to be called from the node itself during initialization.
     def link(self, node):
-        print(node)
+        # print(node)
         if node not in self._nodes:
             self._nodes.append(node)
-        print(self._nodes)
+        # print(self._nodes)
         return self.admittance
 
     # volt_admittance_request
