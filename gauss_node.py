@@ -9,12 +9,13 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, selfV, selfS, lines, slack=False):
+    def __init__(self, selfV, selfS, lines, slack=False, current_sensors=[]):
         self.selfV = selfV
         self.selfS = selfS
         self.lines = lines
         self.slack = slack
         self.selfY = 0
+        self.current_sensors = current_sensors
         for line in self.lines:
             self.selfY -= line.link(self)
 
@@ -57,46 +58,18 @@ class Node:
         # New power, based on current voltage information
         self.selfS = newS
 
-    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # Nothing below tested or proofed with changes (dead code)
-    '''
-    def angle_calculation(self):
-        Yself = -1 * sum(self.neighborY)
-        phasor = (np.conj(self.selfS) / self.selfV - (self.selfV * Yself)) / self.neighborV[0] / self.neighborY[0]
-        delta = math.degrees(cmath.phase(phasor))
-        return delta
+    def live_pf(self):
+        # If list is empty, can't do anything
+        if len(self.current_sensors) == 0:
+            return 0
+        # If we have at least one current sensor, we can detect power flowing
+        power_sum = self.selfV * self.Yself_calc()
+        # Add the rest to the power sum
+        for current in self.current_sensors:
+            power_sum += current.current * self.selfV
+        # Power sum will be the net node power.  Power our - power in
+        self.current_sensor_power = power_sum
 
-    def gauss_iter(self):
-        # Step one, what is the power with the current angles?
-        S_current = 0
-        # Step 1:
-        for i in range(len(self.neighborV)):
-            print(self.selfV)
-            print(self.neighborV[i])
-            print(self.neighborY[i])
-            S_current -= self.selfV * (self.neighborV[i] * self.neighborY[i])
-        print(S_current)
-
-        #Disregard above for now, what about voltages?
-        Yself = -1 * sum(self.neighborY)
-        print(Yself)
-        V_current = np.conj(self.selfS)/self.selfV/Yself
-        sums = 0
-        for v, y, d in zip(self.neighborV, self.neighborY, self.neighborDelta):
-            sums -= y*v*(math.cos(d) + math.sin(d) * 1j)
-        V_current += sums/Yself
-        print(V_current)
-        self.neighborDelta = [cmath.phase(V_current)]
-        print(self.neighborDelta)
-
-    def angle_iter(self):
-        for i in np.linspace(math.radians(-30), math.radians(30), 10000):
-            print(math.degrees(i))
-            Yself = -1 * sum(self.neighborY)
-            V_current = np.conj(self.selfS) / self.selfV / Yself
-            sums = 0
-            for v, y in zip(self.neighborV, self.neighborY):
-                sums -= y * v * (math.cos(i) + math.sin(i) * 1j)
-            V_current += sums / Yself
-            print(V_current)
-    '''
+    def Yself_calc(self):
+        Yself = 1/self.selfV * (np.conj(self.selfS) / np.conj(self.selfV) - sum([x.current for x in self.current_sensors]))
+        return Yself
