@@ -16,6 +16,7 @@ class Node:
         self.slack = slack
         self.selfY = 0
         self.current_sensors = current_sensors
+        self.current_sensor_power = 0
         for line in self.lines:
             self.selfY -= line.link(self)
 
@@ -71,5 +72,5 @@ class Node:
         self.current_sensor_power = power_sum
 
     def Yself_calc(self):
-        Yself = 1/self.selfV * (np.conj(self.selfS) / np.conj(self.selfV) - sum([x.current for x in self.current_sensors]))
-        return Yself
+        self.selfY = 1/self.selfV * (np.conj(self.current_sensor_power) / np.conj(self.selfV) - sum([x.current for x in self.current_sensors]))
+        return self.selfY

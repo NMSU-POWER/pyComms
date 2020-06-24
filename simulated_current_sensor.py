@@ -10,4 +10,4 @@ import random
 
 class current_sensor:
     def __init__(self, current_base):
-        self.current = current_base + random.uniform(-1, 1)
+        self.current = current_base # + random.uniform(-1, 1)
