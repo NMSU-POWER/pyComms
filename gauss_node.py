@@ -6,6 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import numpy as np
+import math
 
 
 class Node:
@@ -64,13 +65,16 @@ class Node:
         if len(self.current_sensors) == 0:
             return 0
         # If we have at least one current sensor, we can detect power flowing
-        power_sum = self.selfV * self.Yself_calc()
+        power_sum = (self.selfV ** 2) * self.Yself_calc()
         # Add the rest to the power sum
         for current in self.current_sensors:
-            power_sum += current.current * self.selfV
-        # Power sum will be the net node power.  Power our - power in
+            power_sum += np.conj(current.current) * self.selfV
+        # Power sum will be the net node power.  Power out - power in
         self.current_sensor_power = power_sum
 
     def Yself_calc(self):
         self.selfY = 1/self.selfV * (np.conj(self.current_sensor_power) / np.conj(self.selfV) - sum([x.current for x in self.current_sensors]))
         return self.selfY
+
+    def live_current_sum(self):
+        return np.sum([np.conj(x.current) * self.selfV for x in self.current_sensors])
