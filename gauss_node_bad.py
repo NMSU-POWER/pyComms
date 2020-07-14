@@ -57,8 +57,8 @@ class Node:
         V_current += sums
         V_current /= self.selfY
         # Set own, distribution will automate.
-        if not self.slack:
-            self.selfV = V_current
+        # if not self.slack:
+        #    self.selfV = V_current
 
     # power_calc
     # No input arguments, Node contains necessary information.

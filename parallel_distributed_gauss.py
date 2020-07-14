@@ -6,6 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from gauss_node import Node
+from gauss_node_bad import Node as badNode
 from line_agent import Line_Agent
 import threading
 
@@ -16,9 +17,9 @@ l2_4 = Line_Agent(-4.615+3.077j)
 
 # Create the Node objects with shared info object
 Node1 = Node(1, 0, [l1_2], slack=True)
-Node2 = Node(1, 0, [l1_2, l2_3, l2_4])
-Node3 = Node(1, -.50, [l2_3])
-Node4 = Node(1, -.50, [l2_4])
+Node2 = Node(.9826, 0, [l1_2, l2_3, l2_4])
+Node3 = badNode(1, -.50, [l2_3])
+Node4 = Node(.8975, -.50, [l2_4])
 
 # Assign each Node a thread
 thread1 = threading.Thread(target=Node1.node_manager)
@@ -45,6 +46,11 @@ try:
         print(Node2.selfS)
         print(Node3.selfS)
         print(Node4.selfS)
+        print('Problems: ')
+        print(Node1.problem)
+        print(Node2.problem)
+        print(Node3.problem)
+        print(Node4.problem)
         print('\n')
 except:
     # exception out of gauss loop, close threads
