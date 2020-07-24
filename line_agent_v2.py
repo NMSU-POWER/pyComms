@@ -34,7 +34,7 @@ def pullv():
 
 
 # Return the admittance of the line
-@app.route('pully', methods=['GET'])
+@app.route('/pully', methods=['GET'])
 def pully():
     return myAdmittance
 

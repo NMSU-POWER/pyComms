@@ -22,7 +22,7 @@ class Node:
         self.measuredV = selfV
         self.problem = False
         for line in self.lines:
-            self.selfY -= line.link(self)
+            self.selfY -= requests.get(line + '/pully').content
 
     # node_manager
     # shared_info is a class that holds the shared information to this node
