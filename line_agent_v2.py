@@ -16,7 +16,7 @@ app = flask.Flask(__name__)
 bus = {}
 
 # This value will be manually modified for now
-myAdmittance = 1
+myAdmittance = 6.67j
 
 
 # Push your voltage to the line agent

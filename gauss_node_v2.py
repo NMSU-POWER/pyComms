@@ -61,8 +61,8 @@ class Node:
             # node_info = line.volt_admittance_request(self)
             # sums -= node_info[0] * node_info[1]
             # New lines
-            v = float(requests.get(line + '/pullv').content)
-            y = float(requests.get(line + '/pully').content)
+            v = complex(requests.get(line + '/pullv').content)
+            y = complex(requests.get(line + '/pully').content)
             sums -= v * y
         V_current += sums
         V_current /= self.selfY
@@ -81,8 +81,8 @@ class Node:
             # node_info = line.volt_admittance_request(self)
             # I += node_info[0] * node_info[1]
             # New lines
-            v = float(requests.get(line + '/pullv').content)
-            y = float(requests.get(line + '/pully').content)
+            v = complex(requests.get(line + '/pullv').content)
+            y = complex(requests.get(line + '/pully').content)
             I += v * y
         newS = self.selfV * np.conj(I)
         # New power, based on current voltage information
