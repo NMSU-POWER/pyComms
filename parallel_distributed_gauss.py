@@ -18,7 +18,7 @@ l2_4 = Line_Agent(-4.615+3.077j)
 # Create the Node objects with shared info object
 Node1 = Node(1, 0, [l1_2], slack=True)
 Node2 = Node(.9826, 0, [l1_2, l2_3, l2_4])
-Node3 = badNode(1, -.50, [l2_3])
+Node3 = Node(.8975, -.25, [l2_3])
 Node4 = Node(.8975, -.50, [l2_4])
 
 # Assign each Node a thread
