@@ -22,7 +22,7 @@ class Node:
         self.measuredV = selfV
         self.problem = False
         for line in self.lines:
-            self.selfY -= float(requests.get(line + '/pully').content)
+            self.selfY -= complex(requests.get(line + '/pully').content)
 
     # node_manager
     # shared_info is a class that holds the shared information to this node
