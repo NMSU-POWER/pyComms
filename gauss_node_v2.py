@@ -22,7 +22,7 @@ class Node:
         self.measuredV = selfV
         self.problem = False
         for line in self.lines:
-            self.selfY -= complex(requests.get(line + '/pully').content)
+            self.selfY -= complex(requests.get(line + '/pully').content.decode())
 
     # node_manager
     # shared_info is a class that holds the shared information to this node
@@ -61,8 +61,8 @@ class Node:
             # node_info = line.volt_admittance_request(self)
             # sums -= node_info[0] * node_info[1]
             # New lines
-            v = complex(requests.get(line + '/pullv').content)
-            y = complex(requests.get(line + '/pully').content)
+            v = complex(requests.get(line + '/pullv').content.decode())
+            y = complex(requests.get(line + '/pully').content.decode())
             sums -= v * y
         V_current += sums
         V_current /= self.selfY
@@ -81,8 +81,8 @@ class Node:
             # node_info = line.volt_admittance_request(self)
             # I += node_info[0] * node_info[1]
             # New lines
-            v = complex(requests.get(line + '/pullv').content)
-            y = complex(requests.get(line + '/pully').content)
+            v = complex(requests.get(line + '/pullv').content.decode())
+            y = complex(requests.get(line + '/pully').content.decode())
             I += v * y
         newS = self.selfV * np.conj(I)
         # New power, based on current voltage information
