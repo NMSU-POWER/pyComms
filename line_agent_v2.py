@@ -36,7 +36,7 @@ def pullv():
 # Return the admittance of the line
 @app.route('/pully', methods=['GET'])
 def pully():
-    return myAdmittance
+    return str(myAdmittance)
 
 
 # Run the server with a wsgi host on whatever our IP is
