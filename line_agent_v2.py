@@ -30,7 +30,8 @@ def pushv():
 def pullv():
     for key in bus.keys():
         if key != request.remote_addr:
-            return bus[key]
+            return str(bus[key])
+    return '1'
 
 
 # Return the admittance of the line
