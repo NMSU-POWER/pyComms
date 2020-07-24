@@ -23,6 +23,7 @@ myAdmittance = 6.67j
 @app.route('/pushv', methods=['POST'])
 def pushv():
     bus[request.remote_addr] = request.args['volts']
+    return '200'
 
 
 # Pull the other voltage value, 1 ifndef
