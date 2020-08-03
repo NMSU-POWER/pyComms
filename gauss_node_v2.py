@@ -32,6 +32,7 @@ class Node:
         # Loop forever, always keep the power flow up to date
         while True:
             print(self.selfV)
+            print(np.abs(self.selfV))
             print(self.selfS)
             for line in self.lines:
                 requests.post(line + '/pushv', params={'volts': self.selfV})
