@@ -19,16 +19,16 @@ class Node_Comm:
         self.node_v = 1
         self.is_connected = False
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.ports = [8080, 8081]
         self.port = 8080
 
     def comm_connect(self):
-        ports = [8080, 8081]
         print('test1')
         failed = True
-        port = ports[random.randint(0, len(ports) - 1)]
         while failed:
+            self.port = self.ports[random.randint(0, len(self.ports) - 1)]
             try:
-                self.connection.connect((self.line_ip, 8080))
+                self.connection.connect((self.line_ip, self.port))
                 failed = False
             except:
                 failed = True
@@ -38,5 +38,8 @@ class Node_Comm:
         self.line_y = complex(self.connection.recv(1024).decode())
         while True:
             self.connection.sendall(str(self.node_v).encode())
-            self.remote_v = complex(self.connection.recv(1024).decode())
+            # This line causes a problem
+            rem_v = self.connection.recv(1024).decode()
+            print(rem_v)
+            self.remote_v = complex(rem_v)
 

@@ -10,9 +10,9 @@ import threading
 
 if __name__ == '__main__':
     # Allow both nodes to connect individually
-    node_1 = Line_comm(5j)
+    node_1 = Line_comm(b'5j')
     node_1.comm_connect(8080)
-    node_2 = Line_comm(5j)
+    node_2 = Line_comm(b'5j')
     node_2.comm_connect(8081)
 
     threading.Thread(target=node_1.communicate).start()

@@ -119,7 +119,8 @@ if __name__ == '__main__':
         threads[line].start()
         while not comm_hold[line].is_connected:
             # Below needs to become dynamic
-            print('Waiting for connection to line at ' + line + ' on port ' + str(comm_hold[line].port))
+            # print('Waiting for connection to line at ' + line + ' on port ' + str(comm_hold[line].port))
+            x = 1
         # Need to wait for connections to go through before calculating this.
         node.selfY -= comm_hold[line].line_y
         node.comms[line] = comm_hold[line].line_y

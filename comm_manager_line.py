@@ -9,7 +9,7 @@ import socket
 
 # Accept any incoming connections, then reconnect for out-going?
 class Line_comm:
-    def __init__(self, y, v=1):
+    def __init__(self, y, v=b'1'):
         # v is the voltage of the node connected to this object
         self.v = v
         # other_v is the voltage of the other node connected to the respective line, essentially the voltage the node is
@@ -28,7 +28,7 @@ class Line_comm:
         while True:
             val = self.conn.recv(1024)
             if val.decode() == 'y':
-                self.conn.sendall(str(self.y).encode())
+                self.conn.sendall(self.y)
             else:
                 self.v = val
-                self.conn.sendall(str(self.other_v).encode())
+                self.conn.sendall(self.other_v)
