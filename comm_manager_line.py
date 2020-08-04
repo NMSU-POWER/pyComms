@@ -18,10 +18,12 @@ class Line_comm:
         self.y = y
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    def comm_connect(self):
-        self.s.bind(('', 8080))
+    def comm_connect(self, port):
+        self.s.bind(('', port))
         self.s.listen(1)
         self.conn, self.addr = self.s.accept()
+
+    def communicate(self):
         while True:
             val = self.conn.recv(1024)
             if val.decode() == 'y':

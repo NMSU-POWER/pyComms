@@ -11,15 +11,18 @@ import socket
 
 # class will manage the connection to a line agent.
 class Node_Comm:
-    def __init__(self, ip, v):
+    def __init__(self, ip):
         self.line_ip = ip
         self.remote_v = 1
         self.line_y = 0 # Need some way to request this from the assigned line
-        self.node_v = v
+        self.node_v = 1
+        self.is_connected = False
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def comm_connect(self):
+        ports = [8080, 8081]
         self.connection.connect((self.line_ip, 8080))
+        self.is_connected = True
         self.connection.sendall(b'y')
         self.line_y = complex(self.connection.recv(1024).decode())
         while True:
