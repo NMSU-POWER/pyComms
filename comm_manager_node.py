@@ -8,6 +8,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import socket
+import random
 
 # class will manage the connection to a line agent.
 class Node_Comm:
@@ -18,10 +19,20 @@ class Node_Comm:
         self.node_v = 1
         self.is_connected = False
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.port = 8080
 
     def comm_connect(self):
         ports = [8080, 8081]
-        self.connection.connect((self.line_ip, 8080))
+        print('test1')
+        failed = True
+        port = ports[random.randint(0, len(ports) - 1)]
+        while failed:
+            try:
+                self.connection.connect((self.line_ip, 8080))
+                failed = False
+            except:
+                failed = True
+        print('test2')
         self.is_connected = True
         self.connection.sendall(b'y')
         self.line_y = complex(self.connection.recv(1024).decode())

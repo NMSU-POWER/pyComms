@@ -22,6 +22,7 @@ class Line_comm:
         self.s.bind(('', port))
         self.s.listen(1)
         self.conn, self.addr = self.s.accept()
+        print('connected on port ' + str(port))
 
     def communicate(self):
         while True:
