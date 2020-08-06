@@ -110,7 +110,7 @@ class Node:
 
 
 if __name__ == '__main__':
-    node = Node(1, 0, True)
+    node = Node(1, -.5, False)
     lines = ['10.0.0.234']
     comm_hold = {}
     threads = {}
@@ -127,7 +127,7 @@ if __name__ == '__main__':
             continue
         node.selfY -= comm_hold[line].line_y
         node.admittance[line] = comm_hold[line].line_y
-        print('stored in node: ' + str(comm_hold[line].line_y))
+        print(comm_hold[line].line_y)
         node.otherV[line] = comm_hold[line].remote_v
     main_thread = threading.Thread(target=node.node_manager)
     main_thread.start()

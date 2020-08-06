@@ -15,7 +15,7 @@ class Node_Comm:
     def __init__(self, ip):
         self.line_ip = ip
         self.remote_v = 1j
-        self.line_y = 1 # Need some way to request this from the assigned line
+        self.line_y = None
         self.node_v = 1j
         self.is_connected = False
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,7 +33,9 @@ class Node_Comm:
                 failed = True
         self.is_connected = True
         self.connection.sendall(b'y')
-        self.line_y = complex(self.connection.recv(1024).decode())
+        y = self.connection.recv(1024).decode()
+        print('received: ' + str(y))
+        self.line_y = complex(y)
         while True:
             self.connection.sendall(str(self.node_v).encode())
             # This line causes a problem
