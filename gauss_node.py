@@ -11,17 +11,14 @@ import threading
 
 
 class Node:
-    def __init__(self, selfV, selfS, slack=False, current_sensors=[]):
+    def __init__(self, selfV, selfS, slack=False):
         self.selfV = 1
-        self.otherV = {}
         self.selfS = selfS
         self.slack = slack
         self.selfY = 0
-        self.current_sensors = current_sensors
-        self.current_sensor_power = 0
         self.measuredV = selfV
         self.problem = False
-        self.admittance = {}
+        self.lines = {}
 
     # node_manager
     # shared_info is a class that holds the shared information to this node
@@ -30,17 +27,9 @@ class Node:
         errors = 0
         # Loop forever, always keep the power flow up to date
         while True:
-            #print(self.selfV)
-            #print(np.abs(self.selfV))
-            # print(self.selfS)
-            # print(self.otherV)
-            # for line in self.lines:
-            #     requests.post(line + '/pushv', params={'volts': self.selfV})
             self.gauss_voltage()
             if self.slack:
                 self.power_calc()
-            # print(np.abs(self.selfV))
-            # print(self.measuredV)
             if round(np.abs(self.selfV), 4) != self.measuredV:
                 errors += 1
             else:
@@ -57,14 +46,8 @@ class Node:
         # Normal Gauss voltage method for a node.
         V_current = np.conj(self.selfS / self.selfV)
         sums = 0
-        for key in self.admittance.keys():
-            # Old lines
-            # node_info = line.volt_admittance_request(self)
-            # sums -= node_info[0] * node_info[1]
-            # New lines
-            # v = complex(requests.get(line + '/pullv').content.decode())
-            # y = complex(requests.get(line + '/pully').content.decode())
-            sums -= self.otherV[key] * self.admittance[key]
+        for key in self.lines.keys():
+            sums -= self.lines[key].voltage * self.lines[key].admittance
         V_current += sums
         V_current /= self.selfY
         # Set own, distribution will automate.
@@ -77,24 +60,29 @@ class Node:
     def power_calc(self):
         # I = v of each node multiplied by admittance, summation, simplifies where admittance = 0
         I = self.selfV * self.selfY
-        for key in self.admittance.keys():
-            # Old lines
-            # node_info = line.volt_admittance_request(self)
-            # I += node_info[0] * node_info[1]
-            # New lines
-            # v = complex(requests.get(line + '/pullv').content.decode())
-            # y = complex(requests.get(line + '/pully').content.decode())
-            I += self.otherV[key] * self.admittance[key]
+        for key in self.lines.keys():
+            I += self.lines[key].voltage * self.lines[key].admittance
         newS = self.selfV * np.conj(I)
         # New power, based on current voltage information
         self.selfS = newS
 
 
+# lineVals
+# Hold the admittance and voltage provided by a particular line connection.
+class lineVals:
+    def __init__(self, admittance, voltage):
+        self.admittance = admittance
+        self.voltage = voltage
+
+
 if __name__ == '__main__':
+    # The virtual representation of this particular device.
     node = Node(1, 0, True)
+    # The ip's of the lines we're connected to
     lines = ['10.0.0.234']
     comm_hold = {}
     threads = {}
+    # Set up all the communication handles and threads to run them.
     for line in lines:
         comm_hold[line] = Node_Comm(line)
         threads[line] = threading.Thread(target=comm_hold[line].communicate)
@@ -103,17 +91,21 @@ if __name__ == '__main__':
             # Below needs to become dynamic
             print('Waiting for connection to line at ' + line + ' on port ' + str(comm_hold[line].port))
             # x = 1
-        # Need to wait for connections to go through before calculating this.
+        # Collect all the admittances as soon as possible.
         while comm_hold[line].line_y is None:
             continue
+        # Calculate self admittance
         node.selfY -= comm_hold[line].line_y
-        node.admittance[line] = comm_hold[line].line_y
-        print('stored in node: ' + str(comm_hold[line].line_y))
-        node.otherV[line] = comm_hold[line].remote_v
+        # Create object to hold the admittance and voltage for calculations
+        admittance = comm_hold[line].line_y
+        voltage = comm_hold[line].remote_v
+        node.lines[line] = lineVals(admittance, voltage)
+
+    # Start the main thread that runs our calculations
     main_thread = threading.Thread(target=node.node_manager)
     main_thread.start()
+    # The final portion of the node is a thread that will continually pull in and push out voltages for the interface.
     while True:
         for line in lines:
-            node.otherV[line] = comm_hold[line].remote_v
+            node.lines[line].voltage = comm_hold[line].remote_v
             comm_hold[line].node_v = node.selfV
-            # print(node.otherV[line])
