@@ -9,12 +9,10 @@ from comm_manager_line import Line_comm
 import threading
 
 if __name__ == '__main__':
-    # Create and connect to the first node
-    node_1 = Line_comm(b'-.44+6.64j')
-    node_1.comm_connect(8080)
-    # Create and connect to the second node
-    node_2 = Line_comm(b'-.44+6.64j')
-    node_2.comm_connect(8081)
+    # Create the first node link
+    node_1 = Line_comm(y=b'-.44+6.64j', port=8080)
+    # Create the second node link
+    node_2 = Line_comm(y=b'-.44+6.64j', port=8081)
 
     # Node threads need to be started to create a constant spinning communication to both nodes
     threading.Thread(target=node_1.communicate).start()
