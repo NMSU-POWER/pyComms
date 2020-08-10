@@ -22,6 +22,9 @@ class Node_Comm:
         self.ports = [8080, 8081]
         self.port = self.ports[0]
 
+    #
+    # comm_connect
+    # connect to the line agent at the provided IP on one of two ports. Doesn't matter which.
     def comm_connect(self):
         failed = True
         while failed:
@@ -32,9 +35,14 @@ class Node_Comm:
             except:
                 failed = True
         self.is_connected = True
+
+    #
+    # communicate
+    # send our own voltage, receive the other node's voltage.  Request admittance once and store.
+    def communicate(self):
+        self.comm_connect()
         self.connection.sendall(b'y')
         y = self.connection.recv(1024).decode()
-        print('received: ' + str(y))
         self.line_y = complex(y)
         while True:
             self.connection.sendall(str(self.node_v).encode())

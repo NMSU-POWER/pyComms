@@ -97,7 +97,7 @@ if __name__ == '__main__':
     threads = {}
     for line in lines:
         comm_hold[line] = Node_Comm(line)
-        threads[line] = threading.Thread(target=comm_hold[line].comm_connect)
+        threads[line] = threading.Thread(target=comm_hold[line].communicate)
         threads[line].start()
         while not comm_hold[line].is_connected:
             # Below needs to become dynamic
