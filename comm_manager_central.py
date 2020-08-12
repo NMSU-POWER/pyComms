@@ -13,7 +13,18 @@ class central_comm_manager:
         self.central_ip = central_ip
         self.v = 1
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection.bind(('', 8080))
 
+    # connect
+    # continually try to connect until a connection is made.
     def connect(self):
+        while True:
+            try:
+                self.connection.connect((self.central_ip, 8080))
+                break
+            except:
+                continue
 
+    def communicate(self):
+        self.connect()
+        while True:
+            self.connection.sendall(str(self.v).encode())
