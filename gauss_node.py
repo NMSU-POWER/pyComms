@@ -7,6 +7,7 @@
 
 import numpy as np
 from comm_manager_node import Node_Comm
+from comm_manager_central import central_comm_manager
 import threading
 import sys
 
@@ -28,6 +29,8 @@ class Node:
         errors = 0
         # Loop forever, always keep the power flow up to date
         while True:
+            print('voltage: ' + str(self.selfV))
+            print('power: ' + str(self.selfS))
             self.gauss_voltage()
             if self.slack:
                 self.power_calc()
@@ -84,6 +87,11 @@ if __name__ == '__main__':
         slack = True
     # The virtual representation of this particular device.
     node = Node(selfV=float(sys.argv[1]), selfS=float(sys.argv[2]), slack=slack)
+
+    # Make a connection to the central computer
+    central = central_comm_manager('10.0.0.2')
+    threading.Thread(target=central.communicate).start()
+
     # The ip's of the lines we're connected to (will eventually be a server)
     lines = ['10.0.0.234']
     comm_hold = {}

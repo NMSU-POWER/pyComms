@@ -29,7 +29,7 @@ class Line_comm:
     def comm_connect(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', self.port))
-        s.listen(1)
+        s.listen(0)
         self.conn, _ = s.accept()
         print('connected on port ' + str(self.port))
 
