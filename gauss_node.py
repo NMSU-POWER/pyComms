@@ -78,12 +78,12 @@ class lineVals:
 
 if __name__ == '__main__':
     # Process slack or not
-    if sys.argv[2] == 'False':
+    if sys.argv[3] == 'False':
         slack = False
     else:
         slack = True
     # The virtual representation of this particular device.
-    node = Node(selfV=sys.argv[0], selfS=sys.argv[1], slack=slack)
+    node = Node(selfV=float(sys.argv[1]), selfS=float(sys.argv[2]), slack=slack)
     # The ip's of the lines we're connected to (will eventually be a server)
     lines = ['10.0.0.234']
     comm_hold = {}
