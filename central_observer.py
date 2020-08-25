@@ -17,6 +17,7 @@ class comm_handle:
     def communicate(self):
         while True:
             self.voltage = int(self.connection.recv(1024).decode())
+            self.connection.sendall(b'ack')
             print(self.voltage)
 
 

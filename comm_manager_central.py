@@ -28,3 +28,4 @@ class central_comm_manager:
         self.connect()
         while True:
             self.connection.sendall(str(self.v).encode())
+            self.connection.recv(1024)
