@@ -123,3 +123,4 @@ if __name__ == '__main__':
         for line in lines:
             node.lines[line].voltage = comm_hold[line].remote_v
             comm_hold[line].node_v = node.selfV
+            central.v = node.selfV

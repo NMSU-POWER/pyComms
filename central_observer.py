@@ -7,6 +7,7 @@
 
 import socket
 import threading
+import time
 
 class comm_handle:
     def __init__(self, connection, addr):
@@ -18,7 +19,7 @@ class comm_handle:
         while True:
             self.voltage = int(self.connection.recv(1024).decode())
             self.connection.sendall(b'ack')
-            print(self.voltage)
+            # print(self.voltage)
 
 
 connection_list = []
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     threading.Thread(target=accept_connections).start()
     # print the values in the comm handles
     while True:
-        #for node in connection_list:
-            #print('v @ ' + str(node.addr[0]) + ': ' + str(node.voltage))
-        #print('list complete.\n')
-        x=1
+        for node in connection_list:
+            print('v @ ' + str(node.addr[0]) + ': ' + str(node.voltage))
+        print('list complete.\n')
+        time.sleep(2)
