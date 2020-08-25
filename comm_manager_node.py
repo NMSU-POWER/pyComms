@@ -9,16 +9,17 @@
 
 import socket
 import random
+import time
 
 # class will manage the connection to a line agent.
 class Node_Comm:
     def __init__(self, ip):
         self.line_ip = ip
-        self.remote_v = 1j
+        self.remote_v = complex('-inf')
         self.line_y = None
         self.node_v = 1j
         self.is_connected = False
-        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection = None
         self.ports = [8080, 8081]
         self.port = self.ports[0]
 
@@ -26,6 +27,7 @@ class Node_Comm:
     # comm_connect
     # connect to the line agent at the provided IP on one of two ports. Doesn't matter which.
     def comm_connect(self):
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         failed = True
         while failed:
             self.port = self.ports[random.randint(0, len(self.ports) - 1)]
@@ -47,8 +49,10 @@ class Node_Comm:
             self.line_y = complex(y)
             while True:
                 self.connection.sendall(str(self.node_v).encode())
-                # This line causes a problem
+                self.connection.settimeout(1)
                 self.remote_v = complex(self.connection.recv(1024).decode())
         except:
+            self.remote_v = complex('-inf')
+            self.connection.close()
             self.communicate()
 

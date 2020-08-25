@@ -12,10 +12,10 @@ import socket
 class Line_comm:
     def __init__(self, y, port):
         # v is the voltage of the node connected to this object
-        self.v = b'1'
+        self.v = b'-inf'
         # other_v is the voltage of the other node connected to the respective line, essentially the voltage the node is
         # communicating to get
-        self.other_v = b'1'
+        self.other_v = b'-inf'
         # The provided admittance will be provided as requested
         self.y = y
         # The connection to be used in the whole object
@@ -47,4 +47,6 @@ class Line_comm:
                     self.v = val
                     self.conn.sendall(self.other_v)
         except:
+            print('Node on ' + str(self.port) + ' has disconnected.')
+            self.v = b'-inf'
             self.communicate()

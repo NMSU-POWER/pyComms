@@ -29,8 +29,8 @@ class Node:
         errors = 0
         # Loop forever, always keep the power flow up to date
         while True:
-            print('voltage: ' + str(self.selfV))
-            print('power: ' + str(self.selfS))
+            # print('voltage: ' + str(self.selfV))
+            # print('power: ' + str(self.selfS))
             self.gauss_voltage()
             if self.slack:
                 self.power_calc()
@@ -51,7 +51,12 @@ class Node:
         V_current = np.conj(self.selfS / self.selfV)
         sums = 0
         for key in self.lines.keys():
-            sums -= self.lines[key].voltage * self.lines[key].admittance
+            volts = self.lines[key].voltage
+            if volts == complex('-inf'):
+                print('flagged value')
+                continue
+            print(volts)
+            sums -= volts * self.lines[key].admittance
         V_current += sums
         V_current /= self.selfY
         # Set own, distribution will automate.
@@ -65,7 +70,10 @@ class Node:
         # I = v of each node multiplied by admittance, summation, simplifies where admittance = 0
         I = self.selfV * self.selfY
         for key in self.lines.keys():
-            I += self.lines[key].voltage * self.lines[key].admittance
+            volts = self.lines[key].voltage
+            if volts == complex('-inf'):
+                continue
+            I += volts * self.lines[key].admittance
         newS = self.selfV * np.conj(I)
         # New power, based on current voltage information
         self.selfS = newS
@@ -93,7 +101,7 @@ if __name__ == '__main__':
     threading.Thread(target=central.communicate).start()
 
     # The ip's of the lines we're connected to (will eventually be a server)
-    lines = ['10.0.0.234']
+    lines = ['10.0.0.180']
     comm_hold = {}
     threads = {}
     # Set up all the communication handles and threads to run them.
