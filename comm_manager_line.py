@@ -37,11 +37,14 @@ class Line_comm:
     # communicate
     # Continually send and receive the respective voltage values or the admittance when requested.
     def communicate(self):
-        self.comm_connect()
-        while True:
-            val = self.conn.recv(1024)
-            if val.decode() == 'y':
-                self.conn.sendall(self.y)
-            else:
-                self.v = val
-                self.conn.sendall(self.other_v)
+        try:
+            self.comm_connect()
+            while True:
+                val = self.conn.recv(1024)
+                if val.decode() == 'y':
+                    self.conn.sendall(self.y)
+                else:
+                    self.v = val
+                    self.conn.sendall(self.other_v)
+        except:
+            self.communicate()

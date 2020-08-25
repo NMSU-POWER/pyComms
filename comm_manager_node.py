@@ -40,12 +40,15 @@ class Node_Comm:
     # communicate
     # send our own voltage, receive the other node's voltage.  Request admittance once and store.
     def communicate(self):
-        self.comm_connect()
-        self.connection.sendall(b'y')
-        y = self.connection.recv(1024).decode()
-        self.line_y = complex(y)
-        while True:
-            self.connection.sendall(str(self.node_v).encode())
-            # This line causes a problem
-            self.remote_v = complex(self.connection.recv(1024).decode())
+        try:
+            self.comm_connect()
+            self.connection.sendall(b'y')
+            y = self.connection.recv(1024).decode()
+            self.line_y = complex(y)
+            while True:
+                self.connection.sendall(str(self.node_v).encode())
+                # This line causes a problem
+                self.remote_v = complex(self.connection.recv(1024).decode())
+        except:
+            self.communicate()
 
