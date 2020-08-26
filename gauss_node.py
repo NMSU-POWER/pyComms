@@ -97,11 +97,11 @@ if __name__ == '__main__':
     node = Node(selfV=float(sys.argv[1]), selfS=float(sys.argv[2]), slack=slack)
 
     # Make a connection to the central computer
-    central = central_comm_manager('10.0.0.10')
+    central = central_comm_manager('10.0.0.180')
     threading.Thread(target=central.communicate).start()
 
     # The ip's of the lines we're connected to (will eventually be a server)
-    lines = ['10.0.0.180']
+    lines = ['10.0.0.181']
     comm_hold = {}
     threads = {}
     # Set up all the communication handles and threads to run them.
