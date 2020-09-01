@@ -12,11 +12,12 @@ class central_comm_manager:
     def __init__(self, central_ip):
         self.central_ip = central_ip
         self.v = 1
-        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection = None
 
     # connect
     # continually try to connect until a connection is made.
     def connect(self):
+        self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         while True:
             try:
                 self.connection.connect((self.central_ip, 8080))
@@ -25,7 +26,12 @@ class central_comm_manager:
                 continue
 
     def communicate(self):
-        self.connect()
-        while True:
-            self.connection.sendall(str(self.v).encode())
-            self.connection.recv(1024)
+        try:
+            self.connect()
+            while True:
+                self.connection.sendall(str(self.v).encode())
+                self.connection.settimeout(1)
+                self.connection.recv(1024)
+        except:
+            self.connection.close()
+            self.communicate()

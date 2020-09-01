@@ -16,10 +16,12 @@ class comm_handle:
         self.voltage = 1
 
     def communicate(self):
-        while True:
-            self.voltage = complex(self.connection.recv(1024).decode())
-            self.connection.sendall(b'ack')
-            # print(self.voltage)
+        try:
+            while True:
+                self.voltage = complex(self.connection.recv(1024).decode())
+                self.connection.sendall(b'ack')
+        except:
+            self.voltage = complex('-inf')
 
 
 connection_list = []
@@ -42,6 +44,9 @@ if __name__ == "__main__":
     # print the values in the comm handles
     while True:
         for node in connection_list:
+            if node.voltage == complex('-inf'):
+                connection_list.remove(node)
+                continue
             print('v @ ' + str(node.addr[0]) + ': ' + str(node.voltage))
         print('list complete.\n')
         time.sleep(2)
