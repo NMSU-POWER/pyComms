@@ -29,8 +29,6 @@ class Node:
         errors = 0
         # Loop forever, always keep the power flow up to date
         while True:
-            # print('voltage: ' + str(self.selfV))
-            # print('power: ' + str(self.selfS))
             self.gauss_voltage()
             if self.slack:
                 self.power_calc()
@@ -53,7 +51,6 @@ class Node:
         for key in self.lines.keys():
             volts = self.lines[key].voltage
             if volts == complex('-inf'):
-                print('flagged value')
                 continue
             print(volts)
             sums -= volts * self.lines[key].admittance
