@@ -11,7 +11,6 @@ import numpy as np
 Y = [[6.06-123.47j, -1.63+57.1j, -4.42+66.37j], [-1.63+57.1j, 6.58-106.6j, -4.95+49.5j],
      [-4.42+66.37j, -4.95+49.5j, 9.38-115.88j]]
 
-
 # Using the costs from the textbook for the 3 bus case (page 357) simply for realistic numbers
 c = [.001562 * 2, .00194 * 2, .00482 * 2 * 100000]
 b = [7.92, 7.85, 7.97]
