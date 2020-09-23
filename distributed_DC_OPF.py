@@ -30,25 +30,35 @@ class bus:
         return self.gen - self.load
 
 
+class line:
+    def __init__(self, bus1, bus2):
+        self.bus1 = bus1
+        self.bus2 = bus2
+        ld_line = 0
+        difference = self.bus1.power_calc(self.bus2.delta, ld_line) + self.bus2.power_calc(self.bus1.delta, ld_line)
+        epsilon = .001
+        while difference < 0 - epsilon or difference > 0 + epsilon:
+            if difference < 0:
+                ld_line += .001
+            else:
+                ld_line -= .001
+            print(difference)
+            print(ld_line)
+            print(self.bus1.gen)
+            print(self.bus2.gen)
+            print()
+            difference = self.bus1.power_calc(self.bus2.delta, ld_line) + self.bus2.power_calc(self.bus1.delta, ld_line)
+
+
 # Essentially a line
 if __name__ == "__main__":
     ld_line = 0
-    bus1 = bus(0, 0, 1, .0625, 0)
-    bus2 = bus(960, 0, 1, .0125, 0)
-    difference = bus1.power_calc(bus2.delta, ld_line) + bus2.power_calc(bus1.delta, ld_line)
-    epsilon = .001
-    while difference < 0 - epsilon or difference > 0 + epsilon:
-        if difference < 0:
-            ld_line += .001
-        else:
-            ld_line -= .001
-        print(difference)
-        print(ld_line)
-        print(bus1.gen)
-        print(bus2.gen)
-        print()
-        difference = bus1.power_calc(bus2.delta, ld_line) + bus2.power_calc(bus1.delta, ld_line)
-    print(difference)
-    print(ld_line)
-    print(bus1.gen)
-    print(bus2.gen)
+    bus1 = bus(0, 0, 7.92, .001562 * 2, 0)
+    bus2 = bus(0, 0, 7.85, .00194 * 2, 0)
+    bus3 = bus(300, 0, 7.97, float('inf'), 0)
+
+    line1 = line(bus1, bus2)
+    line2 = line(bus2, bus3)
+    line3 = line(bus1, bus3)
+
+    print(line1.bus1.gen)

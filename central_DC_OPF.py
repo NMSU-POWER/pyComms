@@ -6,13 +6,15 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import numpy as np
+import time
 
+start = time.perf_counter()
 # We'll be using the three bus already put together for a specific case before moving into a general case.
-Y = [[6.06-123.47j, -1.63+57.1j, -4.42+66.37j], [-1.63+57.1j, 6.58-106.6j, -4.95+49.5j],
-     [-4.42+66.37j, -4.95+49.5j, 9.38-115.88j]]
+Y = [[-123.47j, 57.1j, 66.37j], [57.1j, -106.6j, 49.5j],
+     [66.37j, 49.5j, -115.88j]]
 
 # Using the costs from the textbook for the 3 bus case (page 357) simply for realistic numbers
-c = [.001562 * 2, .00194 * 2, .00482 * 2 * 100000]
+c = [.001562 * 2, .00194 * 2, float('inf')]  #.00482 * 2 * 100000]
 b = [7.92, 7.85, 7.97]
 
 # Power load from our system
@@ -33,7 +35,12 @@ L = np.array([[2 * c[0], 0, 0, 0, 0, 0, -1, 0, 0, 0],
      [0, 0, -1, 100 * Y[2][0], 100 * Y[2][1], 100 * Y[2][2], 0, 0, 0, 0],
      [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]])
 
-print(np.linalg.inv(L).dot(result_col))
+res = np.linalg.inv(L).dot(result_col)
+
+end = time.perf_counter()
+
+print(res)
+print(str(end - start))
 
 # Works with reservation.  This assigned generation to bus 3 where no generation exists.  the generation totalled the
 # desired MW, so now i need to find a way to tie bus 3 generation to 0.  Simple way, add a huge cost factor to the
