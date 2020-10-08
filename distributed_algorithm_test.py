@@ -8,15 +8,15 @@
 
 # Step 1, calculate the export from every bus given angles
 def export_calc(ang, B):
-    return [100 * B[1][1] * ang[1] + 100 * B[1][2] * ang[2] + 100 * B[1][3] * ang[3],
-            100 * B[2][1] * ang[1] + 100 * B[2][2] * ang[2] + 100 * B[2][3] * ang[3],
-            100 * B[3][1] * ang[1] + 100 * B[3][2] * ang[2] + 100 * B[3][3] * ang[3]]
+    return [[100 * B[1][1] * ang[1], 100 * B[1][2] * ang[2], 100 * B[1][3] * ang[3]],
+            [100 * B[2][1] * ang[1], 100 * B[2][2] * ang[2], 100 * B[2][3] * ang[3]],
+            [100 * B[3][1] * ang[1], 100 * B[3][2] * ang[2], 100 * B[3][3] * ang[3]]]
 
 
 # Step 2, Calculate value of export with correct lambda
 def bus_value(exported, ld):
     print('export value')
-    
+
     for exp, ld_bus in zip(exported, ld):
         if exp > 0:
 
