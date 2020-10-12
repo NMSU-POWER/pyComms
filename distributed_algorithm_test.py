@@ -8,28 +8,35 @@
 
 # Step 1, calculate the export from every bus given angles
 def export_calc(ang, B):
-    return [[100 * B[1][1] * ang[1], 100 * B[1][2] * ang[2], 100 * B[1][3] * ang[3]],
-            [100 * B[2][1] * ang[1], 100 * B[2][2] * ang[2], 100 * B[2][3] * ang[3]],
-            [100 * B[3][1] * ang[1], 100 * B[3][2] * ang[2], 100 * B[3][3] * ang[3]]]
+    return [[100 * B[0][0] * ang[0] + 100 * B[0][1] * ang[1] + 100 * B[0][2] * ang[2]],
+            [100 * B[1][0] * ang[0] + 100 * B[1][1] * ang[1] + 100 * B[1][2] * ang[2]],
+            [100 * B[2][0] * ang[0] + 100 * B[2][1] * ang[1] + 100 * B[2][2] * ang[2]]]
 
 
 # Step 2, Calculate value of export with correct lambda
-def bus_value(exported, ld):
-    print('export value')
+def bus_value(exported, ld, b, ang):
+    # Bus 1 -> 2
+    one_two = b[0][1] * 100 * (ang[1] - ang[0])
+    two_one = -1 * one_two
+    one_three = b[0][2] * 100 * (ang[2] - ang[0])
+    three_one = -1 * one_three
+    two_three = b[1][2] * 100 * (ang[2] - ang[1])
+    three_two = -1 * two_three
+    transfers = [[one_two, two_one],  # Line 1
+                 [one_three, three_one],  # Line 2
+                 [two_three, three_two]]  # Line 3
+    transfers[0][0] *= ld[0]
+    transfers[0][1] *= ld[1]
+    transfers[1][0] *= ld[0]
+    transfers[1][1] *= ld[2]
+    transfers[2][0] *= ld[1]
+    transfers[2][1] *= ld[2]
+    return transfers
 
-    for exp, ld_bus in zip(exported, ld):
-        if exp > 0:
 
-
-
-# Step 3.a, Adjust lambda upward if price to produce > price received for export, down if else
+# Step 3, Adjust lambda upward if price to produce > price received for export, down if else
 def exported_lambda_calc():
     print('lambda adjust for export')
-
-
-# Step 3.b, Adjust lambda to match power produced if not exporting
-def no_export_lambda_calc():
-    print('No export lambda calc')
 
 
 # Step 4, Estimate desired generation at current lambda
@@ -66,4 +73,7 @@ if __name__ == '__main__':
     export = export_calc(angles, B)
 
     # Step 2
-    value = bus_value(export, lds)
+    value = bus_value(export, lds, B, angles)
+
+    # Step 3
+    lds = exported_lambda_calc()
