@@ -25,18 +25,38 @@ def bus_value(exported, ld, b, ang):
     transfers = [[one_two, two_one],  # Line 1
                  [one_three, three_one],  # Line 2
                  [two_three, three_two]]  # Line 3
+    exports = transfers
     transfers[0][0] *= ld[0]
     transfers[0][1] *= ld[1]
     transfers[1][0] *= ld[0]
     transfers[1][1] *= ld[2]
     transfers[2][0] *= ld[1]
     transfers[2][1] *= ld[2]
-    return transfers
+    return transfers, exports
 
 
 # Step 3, Adjust lambda upward if price to produce > price received for export, down if else
-def exported_lambda_calc():
-    print('lambda adjust for export')
+def exported_lambda_calc(ld, transfers, cost, loads):
+    # Gen 1 export values
+    gen1 = 0
+    gen2 = 0
+    gen3 = 0
+    if transfers[0][0] > 0:
+        gen1 += transfers[0][0]
+    else:
+        gen2 += transfers[0][1]
+    if transfers[1][0] > 0:
+        gen1 += transfers[1][0]
+    else:
+        gen3 += transfers[1][1]
+    if transfers[2][0] > 0:
+        gen2 += transfers[2][0]
+    else:
+        gen3 += transfers[2][1]
+    # gen is the value exported from said bus.
+    gen1 += loads[0]
+    gen2 += loads[1]
+    gen3 += loads[3]
 
 
 # Step 4, Estimate desired generation at current lambda
@@ -68,6 +88,10 @@ if __name__ == '__main__':
     values = [0, 0, 0]
     # Lambdas of each bus
     lds = [0, 0, 0]
+    # Generator cost values
+    costs = [[.001562, 7.92],
+             [.00194, 7.85],
+             [float('inf'), float('inf')]]
 
     # Start with step 1
     export = export_calc(angles, B)
@@ -76,4 +100,4 @@ if __name__ == '__main__':
     value = bus_value(export, lds, B, angles)
 
     # Step 3
-    lds = exported_lambda_calc()
+    lds = exported_lambda_calc(lds, value, costs, load)
