@@ -7,6 +7,7 @@
 
 import numpy as np
 import math
+from pulp import LpVariable, LpMinimize, LpProblem, lpSum
 
 
 class node:
@@ -18,6 +19,7 @@ class node:
         self.b = b
         self.ld = 0
         self.ld_sum = 0
+        self.cost_per_mw = (1000 * a + 1000**2 * b)/1000
         for line in self.lines:
             line.Pnode[self] = 0
 
@@ -47,13 +49,32 @@ class node:
             export += line.Pnode[self]
             line.Pnode[self] = gen_for_line - self.Pload
 
+    def minimize(self):
+        model = LpProblem(name='nodal_minimize', sense=LpMinimize)
+        powerVar = LpVariable('Nodal_power', lowBound=0, upBound=1000)
+        line_vars = {}
+        for line in self.lines:
+            line_vars[LpVariable('line_' + str(line), lowBound=line.limits[0],
+                                 upBound=line.limits[1])] = (line.ld, line)
+        # We have all the variables, compile them
+        model += self.cost_per_mw * powerVar - lpSum([key * line_vars[key][0] for key in line_vars.keys()])
+        model += -1 * powerVar + lpSum([key for key in line_vars.keys()]) == -1 * self.Pload
+        model.solve()
+        print(powerVar.value())
+        self.Pgen = powerVar.value()
+        for key in line_vars.keys():
+            print(key.value())
+            line_vars[key][1].Pnode[self] = key.value()
+        print()
+
 
 class line:
-    def __init__(self):
+    def __init__(self, lower, upper):
         self.Pnode = {}
-        self.ld = 0.01
+        self.ld = 0
         self.balanced = False
         self.eps = .00001
+        self.limits = (lower, upper)
 
     def update_lambda(self):
         total = np.sum([self.Pnode[x] for x in self.Pnode.keys()])
@@ -63,57 +84,35 @@ class line:
         else:
             total_log = 0
         if total < 0:
-            if total_log > 1:
-                self.ld += 1
-            else:
-                self.ld += .0001
+            # if total_log > 1:
+            #     self.ld += 1
+            # else:
+            self.ld += .01
         if total > 0:
-            if total_log > 1:
-                self.ld -= 1
-            else:
-                self.ld -= .0001
+            # if total_log > 1:
+            #     self.ld -= 1
+            # else:
+            self.ld -= .01
         # if abs(total) <= 0 + self.eps:
         #     self.balanced = True
 
 
 if __name__ == '__main__':
-    line_1 = line()
-    line_2 = line()
-    # line_3 = line()
-    # node_1 = node([line_1, line_2], 0, 7.95, .001562)
-    # node_2 = node([line_1, line_3], 0, 7.85, .00194)
-    # node_3 = node([line_2, line_3], 300, None, None)
-
+    line_1 = line(-1000, 1000)
     node_1 = node([line_1], 0, 1, .0625)
-    node_2 = node([line_1, line_2], 0, 1, .0125)
-    node_3 = node([line_2], 100, None, None)
+    node_2 = node([line_1], 960, 1, .0125)
+    # node_3 = node([line_2], 100, None, None)
     i = 0
     while line_1.balanced is not True:
         i += 1
-        node_1.update_ld()
-        node_2.update_ld()
-        node_3.update_ld()
-        node_1.update_power()
-        node_2.update_power()
-        node_3.update_power()
-        print('Node 1 power: ' + str(node_1.Pgen))
-        print('Node 2 power: ' + str(node_2.Pgen))
-        print('Node 3 power: ' + str(node_3.Pgen))
-        print('Power transfers on line 1: ' + str(line_1.Pnode))
-        print('Power transfers on line 2: ' + str(line_2.Pnode))
-        print('Line 1 lambda: ' + str(line_1.ld))
-        print('Line 2 lambda: ' + str(line_2.ld))
+        node_1.minimize()
+        node_2.minimize()
         line_1.update_lambda()
-        line_2.update_lambda()
-        # line_3.update_lambda()
-        '''print(node_1.Pgen)
+        print(node_1.Pgen)
         print(node_2.Pgen)
-        print(node_3.Pgen)
+        print(line_1.Pnode)
         print(line_1.ld)
-        print(line_2.ld)
-        print(line_3.ld)
-        print()'''
-        print()
         # if i == 200:
-        #     exit()
+        #     break
+        print()
     print(str(i) + ' iterations to completion')
