@@ -87,12 +87,12 @@ class line:
             # if total_log > 1:
             #     self.ld += 1
             # else:
-            self.ld += .01
+            self.ld += .1
         if total > 0:
             # if total_log > 1:
             #     self.ld -= 1
             # else:
-            self.ld -= .01
+            self.ld -= .1
         # if abs(total) <= 0 + self.eps:
         #     self.balanced = True
 
