@@ -12,7 +12,7 @@ import statistics
 class InternalLine:
     def __init__(self, admittance):
         # Delta of the node at the other end
-        self.otherSideDelta = 0
+        self.delta = {}
         # Admittance of this line
         self.admittance = admittance
         # reactance of the line
@@ -20,7 +20,7 @@ class InternalLine:
         # The lambda of this line
         self.lineLambda = 0
         # Power being pushed into the line from this side of a node
-        self.powerOutThisSide = 0
+        self.powerOut = {}
 
 # Hold information pertaining to the specific bus (node)
 class Node:
@@ -38,16 +38,31 @@ class Node:
         # list of internalLine objects (or ips)
         self.lines = lines
         # reactance summation
-        self.reactanceSum = sum([x.reactance for x in self.lines])
+        self.reactanceSum = sum([1 / x.reactance for x in self.lines])
+        # set up our delta in the lines
+        for line in self.lines:
+            line.delta[self] = self.delta
+            line.powerOut[self] = 0
 
     def update_power_angle(self):
         # Update power first
         self.power = (statistics.mean([x.lineLambda for x in self.lines]) - self.a) / self.b
         # Now update self angle
-        self.delta = self.power - self.load + sum([x.otherSideDelta / x.reactance for x in self.lines])
+        delta_reactance = []
+        for line in self.lines:
+            otherDelta = {}
+            for node in line.delta.keys():
+                if node != self:
+                    otherDelta = line.delta[node]
+            delta_reactance.append((otherDelta, line.reactance))
+        self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance]))/self.reactanceSum
         # Now update the power transferred out on this side of the line object
         for line in self.lines:
-            line.powerOutThisSide = (self.delta - line.otherSideDelta) / self.reactanceSum
+            otherDelta = {}
+            for node in line.delta.keys():
+                if node != self:
+                    otherDelta = line.delta[node]
+            line.powerOut[self] = (self.delta - otherDelta) / line.reactance
 
 
 if __name__ == '__main__':
@@ -59,3 +74,10 @@ if __name__ == '__main__':
     node1 = Node(load=0, a=1, b=.01, lines=[line1, line2])
     node2 = Node(load=0, a=1, b=.015, lines=[line1, line3])
     node3 = Node(load=400, a=1, b=.02, lines=[line2, line3])
+
+    # Testing
+    node1.update_power_angle()
+    print(node1.power)
+    print(node1.delta)
+    print(line1.powerOut)
+    print(line2.powerOut)
