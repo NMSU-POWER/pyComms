@@ -9,14 +9,28 @@ import socket
 
 class NodeConnection:
     def __init__(self, ip):
+        self.provided_value = b'sendnode'
+        self.received_value = b'recnode'
         self.ip = ip
         self.connection = None
-        self.connect()
+        self.trade_values()
 
     def connect(self):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.connection.connect((self.ip, 8080))
-        self.connection.sendall(b'{test: 5}')
+
+    def trade_values(self):
+        disconnected = True
+        while disconnected:
+            try:
+                self.connect()
+                while True:
+                    self.connection.sendall(self.provided_value)
+                    self.received_value = self.connection.recv(1024)
+                    print(self.received_value)
+            except Exception as e:
+                print(e)
+                disconnected = True
 
 
 if __name__ == "__main__":

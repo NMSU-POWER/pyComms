@@ -7,18 +7,29 @@
 
 import socket
 
+
 class LineConnection:
     def __init__(self):
+        self.received_value = b'recline'
+        self.provided_value = b'sendline'
         self.connection = None
-        self.connect()
+        disconnected = True
+        while disconnected:
+            try:
+                self.connect()
+                while True:
+                    self.received_value = self.connection.recv(1024)
+                    print(self.received_value)
+                    self.connection.sendall(self.provided_value)
+            except Exception as e:
+                print(e)
+                disconnected = True
 
     def connect(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(('', 8080))
         s.listen(0)
         self.connection, addr = s.accept()
-        print(addr)
-        print(self.connection.recv(1024))
 
 
 if __name__ == "__main__":
