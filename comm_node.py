@@ -8,9 +8,9 @@
 import socket
 
 class NodeConnection:
-    def __init__(self, ip):
-        self.provided_value = b'sendnode'
-        self.received_value = b'recnode'
+    def __init__(self, ip, provvalue):
+        self.provided_value = provvalue
+        self.received_value = None
         self.ip = ip
         self.connection = None
         self.trade_values()
@@ -34,4 +34,4 @@ class NodeConnection:
 
 
 if __name__ == "__main__":
-    connection = NodeConnection('10.0.0.10')
+    connection = NodeConnection('10.0.0.10', b'test2')

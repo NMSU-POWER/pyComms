@@ -9,9 +9,9 @@ import socket
 
 
 class LineConnection:
-    def __init__(self):
-        self.received_value = b'recline'
-        self.provided_value = b'sendline'
+    def __init__(self, provvalue):
+        self.received_value = None
+        self.provided_value = provvalue
         self.connection = None
         disconnected = True
         while disconnected:
@@ -33,4 +33,4 @@ class LineConnection:
 
 
 if __name__ == "__main__":
-    line = LineConnection()
+    line = LineConnection(b'test1')
