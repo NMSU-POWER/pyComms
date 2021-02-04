@@ -30,7 +30,7 @@ class Line:
         # Lists of other lambdas
         self.other_lambdas = {}
         # Value to send
-        self.send_out = b'{test: "testline1"}'
+        self.send_out = str({"reactance": self.reactance}).encode()
 
     def lambda_update(self):
         collected_lambdas = []

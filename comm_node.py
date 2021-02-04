@@ -14,7 +14,7 @@ class NodeConnection:
         self.ip = ip
         self.port = port
         self.connection = None
-        self.trade_values()
+        self.connected = False
 
     def connect(self):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,6 +29,7 @@ class NodeConnection:
                     self.connection.sendall(self.provided_value)
                     self.received_value = self.connection.recv(1024)
                     print(self.received_value)
+                    self.connected = True
             except Exception as e:
                 print(e)
                 disconnected = True
@@ -36,3 +37,4 @@ class NodeConnection:
 
 if __name__ == "__main__":
     connection = NodeConnection('10.0.0.10', b'test1', 8081)
+    connection.trade_values()

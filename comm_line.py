@@ -18,6 +18,7 @@ class LineConnection:
         disconnected = True
         while disconnected:
             try:
+                print('Connecting...')
                 self.connect()
                 while True:
                     self.received_value = self.connection.recv(1024)
