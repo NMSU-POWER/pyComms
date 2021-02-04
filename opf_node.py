@@ -6,6 +6,9 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import statistics
+import threading
+import sys
+from comm_node import NodeConnection
 
 
 # Hold information pertaining to the specific bus (node)
@@ -29,6 +32,8 @@ class Node:
         for line in self.lines:
             line.delta[self] = self.delta
             line.powerOut[self] = 0
+        # Value to distribute
+        self.send_out = b'node'
 
     # All the node's calculations can happen in one shot
     def update_power_angle(self):
@@ -59,6 +64,12 @@ class Node:
 
 
 if __name__ == '__main__':
+    node = Node(load=0, a=1, b=.01, lines=[line1, line2])
+    lines = []
+    for line_ip in sys.argv[1]:
+        lines.append(threading.Thread(target=NodeConnection,
+                                      kwargs={'ip': line_ip, 'provvalue': node.send_out, 'port': 8080}))
+    '''
     # Make lines
     line1 = InternalLine(admittance=1.63-57.10j)
     line2 = InternalLine(admittance=4.42-66.37j)
@@ -89,4 +100,4 @@ if __name__ == '__main__':
         
         print(line1.lineLambda)
         print(line2.lineLambda)
-        print(line3.lineLambda)
+        print(line3.lineLambda)'''

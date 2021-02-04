@@ -6,15 +6,17 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 import statistics
+import threading
+from comm_line import LineConnection
 
 # Global for now, constant that affects how quickly a node changes lambda.
 alpha = -.01
 
 
-
 # Hold information about the line connected to the node objects
-class InternalLine:
+class Line:
     def __init__(self, admittance):
+        print('Initializing line object...')
         # Delta of the node at the other end
         self.delta = {}
         # Admittance of this line
@@ -27,6 +29,8 @@ class InternalLine:
         self.powerOut = {}
         # Lists of other lambdas
         self.other_lambdas = {}
+        # Value to send
+        self.send_out = b'{test: "testline1"}'
 
     def lambda_update(self):
         collected_lambdas = []
@@ -37,3 +41,15 @@ class InternalLine:
         self.lineLambda = self.lineLambda + power_out * alpha
         collected_lambdas.append(self.lineLambda)
         self.lineLambda = statistics.mean(collected_lambdas)
+
+
+# Set up the line object and the connections, manage the values provided to the line
+if __name__ == "__main__":
+    line = Line(admittance=1.63-57.10j)
+    node_con_1 = threading.Thread(target=LineConnection, kwargs={'provvalue': line.send_out, 'port': 8080}).start()
+    node_con_2 = threading.Thread(target=LineConnection, kwargs={'provvalue': line.send_out, 'port': 8081}).start()
+    # Loop continually.  Alternate between updating the lambda and passing around new values
+    while True:
+        line.lambda_update()
+        # Need to update values passed around
+        # Get the node working first

@@ -8,16 +8,17 @@
 import socket
 
 class NodeConnection:
-    def __init__(self, ip, provvalue):
+    def __init__(self, ip, provvalue, port):
         self.provided_value = provvalue
         self.received_value = None
         self.ip = ip
+        self.port = port
         self.connection = None
         self.trade_values()
 
     def connect(self):
         self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.connection.connect((self.ip, 8080))
+        self.connection.connect((self.ip, self.port))
 
     def trade_values(self):
         disconnected = True
@@ -34,4 +35,4 @@ class NodeConnection:
 
 
 if __name__ == "__main__":
-    connection = NodeConnection('10.0.0.10', b'test2')
+    connection = NodeConnection('10.0.0.10', b'test1', 8081)

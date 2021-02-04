@@ -9,9 +9,11 @@ import socket
 
 
 class LineConnection:
-    def __init__(self, provvalue):
+    def __init__(self, provvalue, port):
+        print('Initializing line connection...')
         self.received_value = None
         self.provided_value = provvalue
+        self.port = port
         self.connection = None
         disconnected = True
         while disconnected:
@@ -27,7 +29,7 @@ class LineConnection:
 
     def connect(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.bind(('', 8080))
+        s.bind(('', self.port))
         s.listen(0)
         self.connection, addr = s.accept()
 
