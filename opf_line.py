@@ -34,9 +34,6 @@ class Line:
         # node's last power out
         self.node1_last_power = 0
         self.node2_last_power = 0
-        # node's last angle out
-        self.node1_last_delta = 0
-        self.node2_last_delta = 0
         # Value to send
         self.send_out = str({"reactance": self.reactance,
                              "other_delta": 0,
@@ -59,8 +56,6 @@ class Line:
         self.power_out += recval1['power_out']
         last_n1_power = recval1['power_out']
         last_n2_power = recval2['power_out']
-        last_n1_delta = recval1['delta']
-        last_n2_delta = recval2['delta']
         # Update lambda
         if last_n1_power != self.node1_last_power and last_n2_power != self.node2_last_power:
             self.node1_last_power = last_n1_power

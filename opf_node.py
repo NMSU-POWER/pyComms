@@ -60,8 +60,6 @@ class Node:
             line.power_out = 0
         # Value to distribute
         self.send_out = b'node'
-        # Am I slack (one per system)
-        self.slack = slack
 
     # All the node's calculations can happen in one shot
     def update_power_angle(self):
@@ -72,8 +70,6 @@ class Node:
         for line in self.lines:
             delta_reactance.append((line.other_delta, line.line_reactance))
         self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance])) / self.reactanceSum
-        # if self.slack:
-        #     self.delta = 0
         for line in self.lines:
             line.local_delta = self.delta
         # Now update the power transferred out on this side of the line object
@@ -104,7 +100,7 @@ if __name__ == '__main__':
             continue
         line.gather_info()
     print('Initializing node...')
-    node = Node(load=0, a=1, b=.005, lines=lines, slack=False)
+    node = Node(load=0, a=1, b=.005, lines=lines)
     # Time to actually run stuff
     while True:
         node.update_power_angle()
