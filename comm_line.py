@@ -15,15 +15,21 @@ class LineConnection:
         self.provided_value = provvalue
         self.port = port
         self.connection = None
+        self.connected = False
+
+    def trade_values(self):
         disconnected = True
         while disconnected:
             try:
                 print('Connecting...')
+                self.connected = False
                 self.connect()
+                print('Connected...')
                 while True:
                     self.received_value = self.connection.recv(1024)
                     print(self.received_value)
                     self.connection.sendall(self.provided_value)
+                    self.connected = True
             except Exception as e:
                 print(e)
                 disconnected = True

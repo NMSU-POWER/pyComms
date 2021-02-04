@@ -9,6 +9,7 @@ import statistics
 import threading
 import sys
 import json
+import time
 from comm_node import NodeConnection
 
 
@@ -22,16 +23,23 @@ class Line:
         self.comm_object = comm_chanel
         self.line_lambda = 0
         self.other_lambdas = []
-        self.comm_object.provided_value = str({"delta": self.local_delta, "other_lambdas": self.other_lambdas}).encode()
+        self.comm_object.provided_value = str({"delta": self.local_delta,
+                                               "other_lambdas": self.other_lambdas,
+                                               "power_out": self.power_out}).encode()
 
     def gather_info(self):
-        self.line_reactance = json.loads(self.comm_object.received_value.decode().replace("'", '"'))['reactance']
-        self.comm_object.provided_value = str({"delta": self.local_delta, "other_lambdas": self.other_lambdas}).encode()
+        recd = json.loads(self.comm_object.received_value.decode().replace("'", '"'))
+        self.line_reactance = recd['reactance']
+        self.other_delta = recd['other_delta']
+        self.line_lambda = recd['lambda']
+        self.comm_object.provided_value = str({"delta": self.local_delta,
+                                               "other_lambdas": self.other_lambdas,
+                                               "power_out": self.power_out}).encode()
 
 
 # Hold information pertaining to the specific bus (node)
 class Node:
-    def __init__(self, load, a, b, lines):
+    def __init__(self, load, a, b, lines, slack=False):
         # Initialization angle is always 0
         self.delta = 0
         # load is assigned at start (for now)
@@ -52,6 +60,8 @@ class Node:
             line.power_out = 0
         # Value to distribute
         self.send_out = b'node'
+        # Am I slack (one per system)
+        self.slack = slack
 
     # All the node's calculations can happen in one shot
     def update_power_angle(self):
@@ -61,19 +71,14 @@ class Node:
         delta_reactance = []
         for line in self.lines:
             delta_reactance.append((line.other_delta, line.line_reactance))
-            '''otherDelta = line.other_delta
-            for node in line.delta.keys():
-                if node != self:
-                    otherDelta = line.delta[node]
-                    delta_reactance.append((otherDelta, line.reactance))'''
-        self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance]))/self.reactanceSum
+        self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance])) / self.reactanceSum
+        if self.slack:
+            self.delta = 0
+        for line in self.lines:
+            line.local_delta = self.delta
         # Now update the power transferred out on this side of the line object
         for line in self.lines:
             line.power_out = (self.delta - line.other_delta) / line.line_reactance
-            '''for node in line.delta.keys():
-                if node != self:
-                    otherDelta = line.delta[node]
-            line.powerOut[self] = (self.delta - otherDelta) / line.reactance'''
             lambdas = []
             for line_for_lambda in self.lines:
                 if line_for_lambda != line:
@@ -86,7 +91,7 @@ if __name__ == '__main__':
     threads = []
     print('Initializing connection objects...')
     for line_ip in sys.argv[1:]:
-        comm = NodeConnection(ip=line_ip, provvalue=b'initialize', port=8081)
+        comm = NodeConnection(ip=line_ip, provvalue=b'initialize', port=8080)
         comms.append(comm)
         threads.append(threading.Thread(target=comm.trade_values, daemon=True).start())
     lines = []
@@ -99,11 +104,13 @@ if __name__ == '__main__':
             continue
         line.gather_info()
     print('Initializing node...')
-    node = Node(load=960, a=1, b=.0125, lines=lines)
+    node = Node(load=0, a=1, b=.005, lines=lines, slack=False)
     # Time to actually run stuff
     while True:
         node.update_power_angle()
-
+        print(node.power)
+        for line in lines:
+            line.gather_info()
 
     '''
     # Make lines
