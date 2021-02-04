@@ -72,8 +72,8 @@ class Node:
         for line in self.lines:
             delta_reactance.append((line.other_delta, line.line_reactance))
         self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance])) / self.reactanceSum
-        if self.slack:
-            self.delta = 0
+        # if self.slack:
+        #     self.delta = 0
         for line in self.lines:
             line.local_delta = self.delta
         # Now update the power transferred out on this side of the line object
