@@ -110,36 +110,3 @@ if __name__ == '__main__':
         print(node.power)
         for line in lines:
             line.gather_info()
-
-    '''
-    # Make lines
-    line1 = InternalLine(admittance=1.63-57.10j)
-    line2 = InternalLine(admittance=4.42-66.37j)
-    line3 = InternalLine(admittance=4.95-49.50j)
-    # Make nodes
-    node1 = Node(load=0, a=1, b=.01, lines=[line1, line2])
-    node2 = Node(load=0, a=1, b=.015, lines=[line1, line3])
-    node3 = Node(load=400, a=1, b=.02, lines=[line2, line3])
-
-    # Testing
-    for i in range(100):
-        node1.update_power_angle()
-        node2.update_power_angle()
-        node3.update_power_angle()
-        line1.lambda_update()
-        line2.lambda_update()
-        line3.lambda_update()
-
-        print('iteration: ' + str(i + 1))
-
-        print(node1.power)
-        print(node2.power)
-        print(node3.power)
-
-        print(line1.powerOut)
-        print(line2.powerOut)
-        print(line3.powerOut)
-        
-        print(line1.lineLambda)
-        print(line2.lineLambda)
-        print(line3.lineLambda)'''
