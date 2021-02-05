@@ -78,7 +78,7 @@ class Line:
 if __name__ == "__main__":
     line = Line(admittance=1.63-57.10j)
     node_con_1 = LineConnection(provvalue=line.send_out, port=8080)
-    node_con_2 = LineConnection(provvalue=line.send_out, port=8080)
+    node_con_2 = LineConnection(provvalue=line.send_out, port=8081)
     thread1 = threading.Thread(target=node_con_1.trade_values, daemon=True).start()
     while node_con_1.connected is False:
         continue

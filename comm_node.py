@@ -12,6 +12,7 @@ class NodeConnection:
         self.provided_value = provvalue
         self.received_value = None
         self.ip = ip
+        self.origin_port = port
         self.port = port
         self.connection = None
         self.connected = False
@@ -35,6 +36,10 @@ class NodeConnection:
                     self.connected = True
             except Exception as e:
                 print(e)
+                if self.port == self.origin_port:
+                    self.port = self.port + 1
+                else:
+                    self.port = self.port - 1
                 disconnected = True
 
 
