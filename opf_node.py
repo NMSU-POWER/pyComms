@@ -103,7 +103,7 @@ if __name__ == '__main__':
             continue
         line.gather_info()
     print('Initializing node...')
-    node = Node(load=sys.argv[1], a=sys.argv[2], b=sys.argv[3], lines=lines)
+    node = Node(load=float(sys.argv[1]), a=float(sys.argv[2]), b=float(sys.argv[3]), lines=lines)
     # Time to actually run stuff
     while True:
         node.update_power_angle()
