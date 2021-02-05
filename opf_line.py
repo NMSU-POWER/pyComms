@@ -8,7 +8,7 @@
 import statistics
 import threading
 import json
-import time
+import sys
 from comm_line import LineConnection
 
 # Global for now, constant that affects how quickly a node changes lambda.
@@ -76,7 +76,7 @@ class Line:
 
 # Set up the line object and the connections, manage the values provided to the line
 if __name__ == "__main__":
-    line = Line(admittance=1.63-57.10j)
+    line = Line(admittance=sys.argv[1])
     node_con_1 = LineConnection(provvalue=line.send_out, port=8080)
     node_con_2 = LineConnection(provvalue=line.send_out, port=8081)
     thread1 = threading.Thread(target=node_con_1.trade_values, daemon=True).start()

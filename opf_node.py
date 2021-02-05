@@ -9,7 +9,6 @@ import statistics
 import threading
 import sys
 import json
-import time
 from comm_node import NodeConnection
 
 
@@ -86,7 +85,7 @@ if __name__ == '__main__':
     comms = []
     threads = []
     print('Initializing connection objects...')
-    for line_ip in sys.argv[1:]:
+    for line_ip in sys.argv[4:]:
         comm = NodeConnection(ip=line_ip, provvalue=b'initialize', port=8080)
         comms.append(comm)
         threads.append(threading.Thread(target=comm.trade_values, daemon=True).start())
@@ -100,7 +99,7 @@ if __name__ == '__main__':
             continue
         line.gather_info()
     print('Initializing node...')
-    node = Node(load=0, a=1, b=.005, lines=lines)
+    node = Node(load=sys.argv[1], a=sys.argv[2], b=sys.argv[3], lines=lines)
     # Time to actually run stuff
     while True:
         node.update_power_angle()
