@@ -46,8 +46,12 @@ class Line:
 
     def gather_info(self, node1, node2):
         self.other_lambdas = []
-        recval1 = json.loads(node1.received_value.decode().replace("'", '"'))
-        recval2 = json.loads(node2.received_value.decode().replace("'", '"'))
+        try:
+            recval1 = json.loads(node1.received_value.decode().replace("'", '"'))
+            recval2 = json.loads(node2.received_value.decode().replace("'", '"'))
+        except Exception as e:
+            print(e)
+            return
         self.other_lambdas.extend(recval1['other_lambdas'])
         self.other_lambdas.extend(recval2['other_lambdas'])
         self.delta[node2] = recval2['delta']

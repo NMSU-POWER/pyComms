@@ -27,7 +27,11 @@ class Line:
                                                "power_out": self.power_out}).encode()
 
     def gather_info(self):
-        recd = json.loads(self.comm_object.received_value.decode().replace("'", '"'))
+        try:
+            recd = json.loads(self.comm_object.received_value.decode().replace("'", '"'))
+        except Exception as e:
+            print(e)
+            return
         self.line_reactance = recd['reactance']
         self.other_delta = recd['other_delta']
         self.line_lambda = recd['lambda']
