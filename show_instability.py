@@ -22,7 +22,6 @@ P1 = 49900
 P2 = 24550
 
 for iteration in iterations[99:199]:
-    print(iteration)
     result.append(result[iteration - 1] + (P1 + P2) * alpha)
 
 plt.plot(iterations, result)
