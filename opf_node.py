@@ -14,7 +14,7 @@ from comm_node import NodeConnection
 
 # Hold information about the line in a simple object
 class Line:
-    def __init__(self, comm_chanel):
+    def __init__(self, comm_chanel, id):
         self.local_delta = 0
         self.power_out = 0
         self.line_reactance = 0
@@ -22,9 +22,11 @@ class Line:
         self.comm_object = comm_chanel
         self.line_lambda = 0
         self.other_lambdas = []
+        self.id = id
         self.comm_object.provided_value = str({"delta": self.local_delta,
                                                "other_lambdas": self.other_lambdas,
-                                               "power_out": self.power_out}).encode()
+                                               "power_out": self.power_out,
+                                               "id": self.id}).encode()
 
     def gather_info(self):
         try:
@@ -37,7 +39,8 @@ class Line:
         self.line_lambda = recd['lambda']
         self.comm_object.provided_value = str({"delta": self.local_delta,
                                                "other_lambdas": self.other_lambdas,
-                                               "power_out": self.power_out}).encode()
+                                               "power_out": self.power_out,
+                                               "id": self.id}).encode()
 
 
 # Hold information pertaining to the specific bus (node)
@@ -53,6 +56,8 @@ class Node:
         self.a = a
         # Linear component of power cost
         self.b = b
+        # Unique ID (provided at startup for now)
+        self.id = id
         # list of internalLine objects (or ips)
         self.lines = lines
         # reactance summation
@@ -62,7 +67,7 @@ class Node:
             line.local_delta = self.delta
             line.power_out = 0
         # Value to distribute
-        self.send_out = b'node'
+        # self.send_out = str({"id": self.id}).encode()
 
     # All the node's calculations can happen in one shot
     def update_power_angle(self):
@@ -89,14 +94,14 @@ if __name__ == '__main__':
     comms = []
     threads = []
     print('Initializing connection objects...')
-    for line_ip in sys.argv[4:]:
+    for line_ip in sys.argv[5:]:
         comm = NodeConnection(ip=line_ip, provvalue=b'initialize', port=8080)
         comms.append(comm)
         threads.append(threading.Thread(target=comm.trade_values, daemon=True).start())
     lines = []
     print('Initializing line objects...')
     for comm in comms:
-        lines.append(Line(comm))
+        lines.append(Line(comm, id=int(sys.argv[4])))
     print('Waiting for line connections...')
     for line in lines:
         while line.comm_object.connected is False:

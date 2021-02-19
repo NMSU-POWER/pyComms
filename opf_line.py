@@ -17,7 +17,7 @@ alpha = -.01
 
 # Hold information about the line connected to the node objects
 class Line:
-    def __init__(self, admittance):
+    def __init__(self, admittance, id):
         print('Initializing line object...')
         # Delta of the node at the other end
         self.delta = {}
@@ -34,10 +34,13 @@ class Line:
         # node's last power out
         self.node1_last_power = 0
         self.node2_last_power = 0
+        # Unique ID provided at startup
+        self.id = id
         # Value to send
         self.send_out = str({"reactance": self.reactance,
                              "other_delta": 0,
-                             "lambda": 0}).encode()
+                             "lambda": 0,
+                             "id": self.id}).encode()
 
     def lambda_update(self):
         self.lineLambda = self.lineLambda + self.power_out * alpha
@@ -74,13 +77,15 @@ class Line:
         sendout2['other_delta'] = self.delta[node1]
         sendout1['lambda'] = self.lineLambda
         sendout2['lambda'] = self.lineLambda
+        sendout1['id'] = self.id
+        sendout2['id'] = self.id
         node1.provided_value = str(sendout1).encode()
         node2.provided_value = str(sendout2).encode()
 
 
 # Set up the line object and the connections, manage the values provided to the line
 if __name__ == "__main__":
-    line = Line(admittance=complex(sys.argv[1]))
+    line = Line(admittance=complex(sys.argv[1]), id=sys.argv[2])
     node_con_1 = LineConnection(provvalue=line.send_out, port=8080)
     node_con_2 = LineConnection(provvalue=line.send_out, port=8081)
     thread1 = threading.Thread(target=node_con_1.trade_values, daemon=True).start()
