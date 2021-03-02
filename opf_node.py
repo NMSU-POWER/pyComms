@@ -62,7 +62,7 @@ class Line:
 
 # Hold information pertaining to the specific bus (node)
 class Node:
-    def __init__(self, load, a, b, lines, slack=False):
+    def __init__(self, load, a, b, lines, id, slack=False):
         # Initialization angle is always 0
         self.delta = 0
         # load is assigned at start (for now)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
             continue
         line.gather_info()
     print('Initializing node...')
-    node = Node(load=float(sys.argv[1]), a=float(sys.argv[2]), b=float(sys.argv[3]), lines=lines)
+    node = Node(load=float(sys.argv[1]), a=float(sys.argv[2]), b=float(sys.argv[3]), id=int(sys.argv[4]), lines=lines)
     # Time to actually run stuff
     while True:
         node.update_power_angle()
