@@ -27,7 +27,7 @@ class LineConnection:
                 print('Connected...')
                 while True:
                     self.received_value = self.connection.recv(1024)
-                    print(self.received_value)
+                    # print(self.received_value)
                     self.connection.sendall(self.provided_value)
                     self.connected = True
             except Exception as e:

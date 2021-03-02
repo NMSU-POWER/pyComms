@@ -9,6 +9,8 @@ import statistics
 import threading
 import json
 import sys
+import time
+import math
 from comm_line import LineConnection
 
 # Global for now, constant that affects how quickly a node changes lambda.
@@ -36,11 +38,13 @@ class Line:
         self.node2_last_power = 0
         # Unique ID provided at startup
         self.id = id
+        # Dictionary of values organized by id: timestamp, device type, and bucket range
+        self.bucket_dict = {str(self.id): [time.time(), 'line', 0, 1]}
         # Value to send
         self.send_out = str({"reactance": self.reactance,
                              "other_delta": 0,
                              "lambda": 0,
-                             "id": self.id}).encode()
+                             "buckets": self.bucket_dict}).encode()
 
     def lambda_update(self):
         self.lineLambda = self.lineLambda + self.power_out * alpha
@@ -59,6 +63,9 @@ class Line:
         self.other_lambdas.extend(recval2['other_lambdas'])
         self.delta[node2] = recval2['delta']
         self.delta[node1] = recval1['delta']
+        d1 = recval1['delta']
+        d2 = recval2['delta']
+        self.bucket_dict[str(self.id)] = [time.time(), 'line', math.floor(d1-d2), math.ceil(d1-d2)]
         self.power_out = recval2['power_out']
         self.power_out += recval1['power_out']
         last_n1_power = recval1['power_out']
@@ -77,8 +84,33 @@ class Line:
         sendout2['other_delta'] = self.delta[node1]
         sendout1['lambda'] = self.lineLambda
         sendout2['lambda'] = self.lineLambda
-        sendout1['id'] = self.id
-        sendout2['id'] = self.id
+        # Need to update the bucket dictionary here
+        # First we need to know how many unique dictionary keys there are.
+        unique = []
+        unique.extend(self.bucket_dict.keys())
+        unique.extend(recval1['buckets'].keys())
+        unique.extend(recval2['buckets'].keys())
+        unique = set(unique)
+        for key in unique:
+            # Assuming this worked and we now have a set of unique keys
+            # First step, see where the key exists, pull the values from these locations
+            compare = []
+            if key in self.bucket_dict.keys():
+                compare.append(self.bucket_dict[key])
+            if key in recval1['buckets'].keys():
+                compare.append(recval1['buckets'][key])
+            if key in recval2['buckets'].keys():
+                compare.append(recval2['buckets'][key])
+            # If all went well, we have at least one value in compare, and up to 3 values
+            # Find the newest of these values
+            times = [x[0] for x in compare]
+            index = times.index(max(times))
+            newest = compare[index]
+            # Theoretically, newest should contain the newest instance of the data
+            self.bucket_dict[key] = newest
+            # IFF everything goes right, we now hold the value we want.  Need to do some small testing to confirm.
+        sendout1['buckets'] = self.bucket_dict
+        sendout2['buckets'] = self.bucket_dict
         node1.provided_value = str(sendout1).encode()
         node2.provided_value = str(sendout2).encode()
 
@@ -101,4 +133,6 @@ if __name__ == "__main__":
         while node_con_2.connected is False:
             continue
         line.gather_info(node_con_1, node_con_2)
-        print(line.lineLambda)
+        # print(line.lineLambda)
+        print('line')
+        print(line.bucket_dict)

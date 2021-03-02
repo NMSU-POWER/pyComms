@@ -9,6 +9,7 @@ import statistics
 import threading
 import sys
 import json
+import time
 from comm_node import NodeConnection
 
 
@@ -23,10 +24,11 @@ class Line:
         self.line_lambda = 0
         self.other_lambdas = []
         self.id = id
+        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5]}
         self.comm_object.provided_value = str({"delta": self.local_delta,
                                                "other_lambdas": self.other_lambdas,
                                                "power_out": self.power_out,
-                                               "id": self.id}).encode()
+                                               "buckets": self.bucket_dict}).encode()
 
     def gather_info(self):
         try:
@@ -37,10 +39,25 @@ class Line:
         self.line_reactance = recd['reactance']
         self.other_delta = recd['other_delta']
         self.line_lambda = recd['lambda']
+        # Need to process incoming values here
+        # This is stage one, where the internal line objects pick new values that come in vs what we have.
+        # This is simpler than the line case, since we only every have two values to look at, our own + the remote one
+        incoming_bucket = recd['buckets']
+        # We can break the pattern from the lines based on this simplicity.  We simply need to check our local
+        # dictionary for each of the keys in the incoming dictionary.  Iff we have a copy, we can compare time stamps.
+        # If we don't have a copy, simply import this new value.
+        for key in incoming_bucket.keys():
+            if key in self.bucket_dict.keys():
+                if self.bucket_dict[key][0] < incoming_bucket[key][0]:
+                    self.bucket_dict[key] = incoming_bucket[key]
+            else:
+                # Must not exist locally
+                self.bucket_dict[key] = incoming_bucket[key]
+        # That should actually do it for here.
         self.comm_object.provided_value = str({"delta": self.local_delta,
                                                "other_lambdas": self.other_lambdas,
                                                "power_out": self.power_out,
-                                               "id": self.id}).encode()
+                                               "buckets": self.bucket_dict}).encode()
 
 
 # Hold information pertaining to the specific bus (node)
@@ -67,12 +84,14 @@ class Node:
             line.local_delta = self.delta
             line.power_out = 0
         # Value to distribute
+        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5]}
         # self.send_out = str({"id": self.id}).encode()
 
     # All the node's calculations can happen in one shot
     def update_power_angle(self):
         # Update power first
         self.power = (statistics.mean([x.line_lambda for x in self.lines]) - self.a) / 2 / self.b
+        self.bucket_dict[str(self.id)] = [time.time(), 'node', int(self.power/10)*10, int(self.power/10)*10+10]
         # Now update self angle
         delta_reactance = []
         for line in self.lines:
@@ -80,8 +99,40 @@ class Node:
         self.delta = (self.power - self.load + sum([x[0] / x[1] for x in delta_reactance])) / self.reactanceSum
         for line in self.lines:
             line.local_delta = self.delta
+        # We should update the buckets here.  At this point, the node can run comparisons for the whole system
+        # and inject new values into itself then copy into the lines.
+        # This will happen one step BEFORE the lines update any values.
+        unique = []
+        unique.extend(self.bucket_dict.keys())
+        for line in self.lines:
+            unique.extend(line.bucket_dict.keys())
+        unique = set(unique)
+        # We should have all unique keys.
+        for key in unique:
+            # Assuming this worked and we now have a set of unique keys
+            # First step, see where the key exists, pull the values from these locations
+            compare = []
+            if key in self.bucket_dict.keys():
+                compare.append(self.bucket_dict[key])
+            for line in self.lines:
+                if key in line.bucket_dict.keys():
+                    compare.append(line.bucket_dict[key])
+            '''if key in recval1['buckets'].keys():
+                compare.append(recval1['buckets'][key])
+            if key in recval2['buckets'].keys():
+                compare.append(recval2['buckets'][key])'''
+            # If all went well, we have at least one value in compare, and up to 3 values
+            # Find the newest of these values
+            times = [x[0] for x in compare]
+            index = times.index(max(times))
+            newest = compare[index]
+            # Theoretically, newest should contain the newest instance of the data
+            self.bucket_dict[key] = newest
+            # IFF everything goes right, we now hold the value we want.  Need to do some small testing to confirm.
         # Now update the power transferred out on this side of the line object
         for line in self.lines:
+            # Distribute the buckets
+            line.bucket_dict = self.bucket_dict
             line.power_out = (self.delta - line.other_delta) / line.line_reactance
             lambdas = []
             for line_for_lambda in self.lines:
@@ -112,6 +163,8 @@ if __name__ == '__main__':
     # Time to actually run stuff
     while True:
         node.update_power_angle()
-        print(node.power)
+        # print(node.power)
         for line in lines:
             line.gather_info()
+        print('Node')
+        print(node.bucket_dict)
