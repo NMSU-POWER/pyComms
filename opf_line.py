@@ -12,6 +12,7 @@ import sys
 import time
 import math
 from comm_line import LineConnection
+import node_verify
 
 # Global for now, constant that affects how quickly a node changes lambda.
 alpha = -.01

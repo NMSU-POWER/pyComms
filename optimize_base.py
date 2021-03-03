@@ -22,7 +22,7 @@ prob += P1 + P2 + P3
 prob += P1 + P2 + P3 == 0
 
 # Solve:
-prob.solve()
+status = prob.solve()
 
 print(P1.value())
 print(P2.value())
@@ -31,3 +31,4 @@ print()
 print(P1.value() - P1_act)
 print(P2.value() - P2_act)
 print(P3.value() - P3_act)
+print(pulp.LpStatus[status])

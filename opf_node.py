@@ -10,6 +10,7 @@ import threading
 import sys
 import json
 import time
+import node_verify
 from comm_node import NodeConnection
 
 
@@ -24,7 +25,7 @@ class Line:
         self.line_lambda = 0
         self.other_lambdas = []
         self.id = id
-        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5]}
+        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5, 'Unsolved']}
         self.comm_object.provided_value = str({"delta": self.local_delta,
                                                "other_lambdas": self.other_lambdas,
                                                "power_out": self.power_out,
@@ -162,9 +163,14 @@ if __name__ == '__main__':
     node = Node(load=float(sys.argv[1]), a=float(sys.argv[2]), b=float(sys.argv[3]), id=int(sys.argv[4]), lines=lines)
     # Time to actually run stuff
     while True:
+        # Add in logic here to decide if we run again
         node.update_power_angle()
         # print(node.power)
         for line in lines:
             line.gather_info()
         print('Node')
         print(node.bucket_dict)
+        solved = node_verify.check_validity(node.bucket_dict)
+        node.bucket_dict[str(node.id)][4] = solved
+        print(solved)
+        time.sleep(2)
