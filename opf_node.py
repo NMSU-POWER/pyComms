@@ -85,7 +85,7 @@ class Node:
             line.local_delta = self.delta
             line.power_out = 0
         # Value to distribute
-        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5]}
+        self.bucket_dict = {str(self.id): [time.time(), 'node', 0, 5, 'Unsolved']}
         # self.send_out = str({"id": self.id}).encode()
 
     # All the node's calculations can happen in one shot
@@ -171,6 +171,6 @@ if __name__ == '__main__':
         print('Node')
         print(node.bucket_dict)
         solved = node_verify.check_validity(node.bucket_dict)
-        node.bucket_dict[str(node.id)][4] = solved
+        node.bucket_dict[str(node.id)][3] = solved
         print(solved)
         time.sleep(2)
