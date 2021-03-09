@@ -16,6 +16,6 @@ def check_validity(buckets):
             vars.append(pulp.LpVariable('power_' + bucket, lowBound=buckets[bucket][2], upBound=buckets[bucket][3]))
     prob += pulp.lpSum(vars)
     prob += pulp.lpSum(vars) == 0
-    status = prob.solve()
+    status = prob.solve(pulp.GLPK(msg=0))
     # We now know if the system is feasible, but we need to return that value.
     return pulp.LpStatus[status]
