@@ -93,8 +93,8 @@ class Node:
     def update_power_angle(self):
         # Update power first
         self.power = (statistics.mean([x.line_lambda for x in self.lines]) - self.a) / 2 / self.b
-        self.bucket_dict[str(self.id)] = [time.time(), 'node', int(self.power/10)*10, int(self.power/10)*10+10,
-                                          self.solved]
+        self.bucket_dict[str(self.id)] = [time.time(), 'node', int((self.power - self.load)/10)*10,
+                                          int((self.power - self.load)/10)*10+10, self.solved]
         # Now update self angle
         delta_reactance = []
         for line in self.lines:
