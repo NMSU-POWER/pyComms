@@ -173,6 +173,7 @@ if __name__ == '__main__':
         print('Node')
         print(node.bucket_dict)
         solved = node_verify.check_validity(node.bucket_dict)
-        node.bucket_dict[str(node.id)][4] = solved
+        node.solved = solved
         print(solved)
+        print('Self power: ' + str(node.power))
         time.sleep(2)
