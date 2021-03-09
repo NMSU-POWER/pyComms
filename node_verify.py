@@ -13,8 +13,6 @@ def check_validity(buckets):
     vars = []
     for bucket in buckets.keys():
         if buckets[bucket][1] == 'node':
-            if buckets[bucket][2] < 0:
-                buckets[bucket][2], buckets[bucket][3] = buckets[bucket][3], buckets[bucket][2]
             vars.append(pulp.LpVariable('power_' + bucket, lowBound=buckets[bucket][2], upBound=buckets[bucket][3]))
     prob += pulp.lpSum(vars)
     prob += pulp.lpSum(vars) == 0
