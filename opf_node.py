@@ -171,6 +171,6 @@ if __name__ == '__main__':
         print('Node')
         print(node.bucket_dict)
         solved = node_verify.check_validity(node.bucket_dict)
-        node.bucket_dict[str(node.id)][3] = solved
+        node.bucket_dict[str(node.id)][4] = solved
         print(solved)
         time.sleep(2)
