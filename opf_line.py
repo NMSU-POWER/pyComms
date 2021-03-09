@@ -23,6 +23,7 @@ class Line:
         print('Initializing line object...')
         # Delta of the node at the other end
         self.delta = {}
+        self.delta_across = 0
         # Admittance of this line
         self.admittance = admittance
         # reactance of the line
@@ -65,6 +66,7 @@ class Line:
         self.delta[node1] = recval1['delta']
         d1 = recval1['delta']
         d2 = recval2['delta']
+        self.delta_across = d1 - d2
         self.bucket_dict[str(self.id)] = [time.time(), 'line', math.floor(d1-d2), math.ceil(d1-d2)]
         self.power_out = recval2['power_out']
         self.power_out += recval1['power_out']
@@ -135,4 +137,5 @@ if __name__ == "__main__":
         line.gather_info(node_con_1, node_con_2)
         # print(line.lineLambda)
         print('line')
+        print(line.delta_across)
         print(line.bucket_dict)
