@@ -20,5 +20,5 @@ class Line:
 
     def update_lambda(self, other_ld):
         self.ld = self.ld + self.alpha * sum([self.ptie[x] for x in self.ptie.keys()])
-        #other_ld.append(self.ld)
-        #self.ld = mean(other_ld)
+        other_ld.append(self.ld)
+        self.ld = mean(other_ld)
