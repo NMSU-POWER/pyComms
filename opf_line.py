@@ -50,7 +50,7 @@ class Line:
     def lambda_update(self):
         self.lineLambda = self.lineLambda + self.power_out * alpha
         self.other_lambdas.append(self.lineLambda)
-        # self.lineLambda = statistics.mean(self.other_lambdas)
+        self.lineLambda = statistics.mean(self.other_lambdas)
 
     def gather_info(self, node1, node2):
         self.other_lambdas = []
