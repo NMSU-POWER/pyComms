@@ -129,13 +129,17 @@ if __name__ == "__main__":
     while node_con_2.connected is False:
         continue
     # Loop continually.  Alternate between updating the lambda and passing around new values
+    i = 0
     while True:
         while node_con_1.connected is False:
             continue
         while node_con_2.connected is False:
             continue
+        i += 1
         line.gather_info(node_con_1, node_con_2)
         # print(line.lineLambda)
         print('line')
         print(line.delta_across)
         print(line.bucket_dict)
+        print('iteration: ' + str(i))
+        time.sleep(5)
