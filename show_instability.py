@@ -32,7 +32,7 @@ for iteration in iterations[99:199]:
     result.append(result[iteration - 1] + (P1 + P2) * alpha)
 
 plt.plot(iterations, result)
-plt.title('System power value versus iterations without P1, P2 change')
+plt.title('System power value versus iterations without P1, P2 change until iteration 100')
 plt.xlabel('Iteration')
 plt.ylabel('System power value')
 plt.show()
