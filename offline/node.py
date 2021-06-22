@@ -23,7 +23,7 @@ class Node:
             line.ptie[self] = 0
 
     def update_p(self):
-        self.p = (mean([i.ld for i in self.lines]) - self.a) / self.b
+        self.p = (mean([i.ld for i in self.lines]) + sum([i.flow[self] for i in self.lines]) - self.a) / self.b
         other_angle_react = 0
         diagonal_react = 0
         for line in self.lines:
