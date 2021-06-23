@@ -37,11 +37,14 @@ if __name__ == "__main__":
     loads = pd.read_excel(system_info, sheet_name='Load Information')
     # exit()
 
+    eps = .001
+
     # Set up the line devices
     lines = []
     max_bus = 0
     for i in range(len(branches['Susceptance'])):
-        line = Line(branches['Susceptance'][i] * 1j, branches['From Bus'][i], branches['To Bus'][i], i)
+        line = Line(branches['Susceptance'][i] * 1j, branches['From Bus'][i], branches['To Bus'][i],
+                    branches['Limit Rating A'][i], i)
         lines.append(line)
         if line.conn2 > max_bus:
             max_bus = line.conn2
@@ -94,6 +97,8 @@ if __name__ == "__main__":
             for connected in connected_list:
                 lambda_list.append(connected.ld)
             line.update_lambda(lambda_list)
+        for line in lines:
+            line.update_flow()
 
     '''
     line1 = Line(57.15j, 1)

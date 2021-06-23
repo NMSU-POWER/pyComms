@@ -21,6 +21,7 @@ class Node:
         for line in self.lines:
             line.delta[self] = self.delta
             line.ptie[self] = 0
+            line.flow[self] = 0
 
     def update_p(self):
         self.p = (mean([i.ld for i in self.lines]) + sum([i.flow[self] for i in self.lines]) - self.a) / self.b

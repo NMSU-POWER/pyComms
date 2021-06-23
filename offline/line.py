@@ -6,6 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from statistics import mean
+import time
 
 class Line:
     def __init__(self, y, conn1, conn2, limit=0, id_input=-1):
@@ -17,6 +18,7 @@ class Line:
         self.ld = 0
         self.alpha = -.001
         self.beta = -.001
+        self.eps = .1
         self.delta = {}
         self.ptie = {}
         self.flow = {}
@@ -30,8 +32,17 @@ class Line:
     def update_flow(self):
         if self.limit <= 0:
             return
-        for key in self.ptie.keys():
-            if self.ptie[key] > 0:
-                self.flow[key] = self.flow[key] + self.beta * (self.ptie[key] - self.limit)
-            else:
-                self.flow[key] = self.flow[key] + self.beta * (self.ptie[key] + self.limit)
+        l1 = [x for x in self.ptie.keys()][0]
+        l2 = [x for x in self.ptie.keys()][1]
+        print(self.limit)
+        print(abs(self.ptie[l1] + self.ptie[l2]))
+        print(abs(self.ptie[l1]))
+        time.sleep(.5)
+        if abs(self.ptie[l1] + self.ptie[l2]) <= self.eps and abs(self.ptie[l1]) > self.limit:
+            print('Here')
+            time.sleep(2)
+            for key in self.ptie.keys():
+                if self.ptie[key] > 0:
+                    self.flow[key] = self.flow[key] + self.beta * (self.ptie[key] - self.limit)
+                else:
+                    self.flow[key] = self.flow[key] + self.beta * (self.ptie[key] + self.limit)
