@@ -6,6 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from statistics import mean
+from pulp import LpMinimize, LpProblem
 
 
 class Node:
@@ -23,7 +24,11 @@ class Node:
             line.ptie[self] = 0
 
     def update_p(self):
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # This calculation needs to become an actual optimization, all other processes after this calculation can remain
+        # Constant.
         self.p = (mean([i.ld for i in self.lines]) - self.a) / self.b
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         other_angle_react = 0
         diagonal_react = 0
         for line in self.lines:
