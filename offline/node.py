@@ -6,7 +6,7 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from statistics import mean
-from pulp import LpMinimize, LpProblem
+from pulp import LpMinimize, LpProblem, LpVariable
 
 
 class Node:
@@ -27,7 +27,24 @@ class Node:
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # This calculation needs to become an actual optimization, all other processes after this calculation can remain
         # Constant.
-        self.p = (mean([i.ld for i in self.lines]) - self.a) / self.b
+        #
+        # Old.
+        # self.p = (mean([i.ld for i in self.lines]) - self.a) / self.b
+        #
+        # New.
+        optimize = LpProblem('power_production', LpMinimize)
+        # Finally see the weighted average.  It's in the optimization, eq: 161 shows it well.
+        # First we need cost as a function of P, in this case, P^2b+Pa=C(P), and we'll just look at a single time step.
+        # random number for upper bound at this time.
+        P = LpVariable('power_produced,', lowBound=0, upBound=500)
+        # This leads our first problem, we can't use linear optimization to optimize a quadratic.
+        # Simple! use linear costs.  Upgrade to the piecewise later.
+        # We have an example of storing linear costs from Dr. Wang's 24 bus system, we'll use that for now.
+        # We have no constraints beyond the power production limits, using the current lambda and this nodes generator
+        # cost, we should be able to do an incredibly simple optimization.
+        #
+        # This won't work as stated.  This will simply return all 0 since we're minimizing...
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         other_angle_react = 0
         diagonal_react = 0
