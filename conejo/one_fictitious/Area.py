@@ -13,7 +13,8 @@ from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConst
 # Hold area problem for one area
 class Area:
     # Initialize the area using the provided data set.
-    def __init__(self, sheet_name):
+    def __init__(self, sheet_name, area):
+        self.AreaNum = area
         self.problem = LpProblem(name='base_case', sense=LpMinimize)
         # Let's load the data and see what we have first.
         self.data_sheet = sheet_name
@@ -161,3 +162,5 @@ class Area:
                      columns=['bus_lmp', 'node_theta']).to_excel(excel, sheet_name='bus')
         excel.close()
 
+    def update_alpha(self, other_delta, iteration, A, B):
+        print('update_magic_here')
