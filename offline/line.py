@@ -18,6 +18,7 @@ class Line:
         self.alpha = -.001
         self.delta = {}
         self.ptie = {}
+        self.zeta = 0
 
     def update_lambda(self, other_ld):
         self.ld = self.ld + self.alpha * sum([self.ptie[x] for x in self.ptie.keys()])

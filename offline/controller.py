@@ -82,9 +82,9 @@ if __name__ == "__main__":
     while True:
         for node in nodes:
             node.update_p()
-            print(node.p)
+            # print(node.p)
         for line in lines:
-            print(line.ld)
+            # print(line.ld)
             connected_list = []
             for node in nodes:
                 if line in node.lines:
