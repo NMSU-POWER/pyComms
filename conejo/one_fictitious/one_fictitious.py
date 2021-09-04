@@ -8,14 +8,14 @@
 from Area import Area
 
 A = 10
-B = 5
+B = 1
 
 if __name__ == '__main__':
     a1 = Area('formatted_data1.xlsx', 1)
     a2 = Area('formatted_data2.xlsx', 2)
     a3 = Area('formatted_data3.xlsx', 3)
 
-    for i in range(100):
+    for i in range(1000):
         a1.solve_it()
         a2.solve_it()
         a3.solve_it()
@@ -44,5 +44,5 @@ if __name__ == '__main__':
                 a3_external.append(a1.theta[a3.external[j] % 100 - 1])
         a3.update_alpha(a3_external, i, A, B)
 
-    print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
-                                    + a3.problem.objective.value()))
+        print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
+                                        + a3.problem.objective.value()))

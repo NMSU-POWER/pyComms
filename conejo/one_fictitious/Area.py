@@ -24,12 +24,12 @@ class Area:
         self.ties = pandas.read_excel(self.data_sheet, 'splice_lines')
 
         # New variables
-        self.alpha = [0] * len(self.ties['From Bus'])
+        self.alpha = [10] * len(self.ties['From Bus'])
         self.tie_theta = []
         froms = self.ties['From Bus']
         tos = self.ties['To Bus']
         tie_limits = self.ties['Conv MVA']
-        tie_X = self.ties['X pu']
+        self.tie_X = self.ties['X pu']
         # We now need to implement flow limits on these lines, i think...
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         self.tie_flow_constraints_high = []
@@ -45,11 +45,13 @@ class Area:
                 self.internal.append(tos[i])
                 self.external.append(froms[i])
             self.tie_theta.append(LpVariable(name='tie_'+str(self.internal[i])+' to ' + str(self.external[i])))
-            self.tie_flow.append(LpVariable(name='tie_'+str(i)))
-            self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=tie_limits[i],
+            self.tie_flow.append(LpVariable(name='tie_'+str(area)+':'+str(i)))
+            self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=.9 * tie_limits[i],
                                                                sense=LpConstraintLE))
-            self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-tie_limits[i],
+            self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-.9 * tie_limits[i],
                                                               sense=LpConstraintGE))
+            self.problem += self.tie_flow_constraints_low[i]
+            self.problem += self.tie_flow_constraints_high[i]
 
         # We now have a theta for every tie line, as well as the flow variables, alpha for price and flow constraints
         # We should be completely ready to implement the new objective function.
@@ -87,7 +89,8 @@ class Area:
             self.flow_vars.append(LpVariable('flow_' + str(i)))
             self.line_cap_constraint_low.append(
                 LpConstraint(e=self.flow_vars[i], rhs=-1 * self.flow_lim[i] * .9, sense=LpConstraintGE))
-            self.line_cap_constraint_high.append(LpConstraint(e=self.flow_vars[i], rhs=self.flow_lim[i] * .9, sense=LpConstraintLE))
+            self.line_cap_constraint_high.append(LpConstraint(e=self.flow_vars[i], rhs=self.flow_lim[i] *
+                                                                                       .9, sense=LpConstraintLE))
             self.problem += self.line_cap_constraint_low[i]
             self.problem += self.line_cap_constraint_high[i]
 
@@ -99,6 +102,16 @@ class Area:
                 rhs=0)
             self.problem += constraint
             self.line_constraints.append(constraint)
+        self.tie_constraints = []
+        for i in range(len(self.tie_flow)):
+            # if tos[i] // 100 == area:
+            constraint = LpConstraint(e=100 * -1/self.tie_X[i] * (self.theta[tos[i] % 100 - 1] -
+                                                                  self.tie_theta[i]) - self.tie_flow[i])
+            # else:
+            #     constraint = LpConstraint(e=100 * -1 / self.tie_X[i] * (-self.theta[tos[i] % 100 - 1] +
+            #                                                             self.tie_theta[i]) - self.tie_flow[i])
+            self.tie_constraints.append(constraint)
+            self.problem += constraint
 
         # Now we can form the proper power balance constraints
         # For every bus...
@@ -109,26 +122,40 @@ class Area:
             for j in range(len(gen_bus)):
                 if gen_bus[j] == bus_number[i]:
                     gens_on_bus.append(self.gen_vars[j])
+            # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # Tied every bus to every output line...
             lines_in = []
             for j in range(len(line_to)):
                 if line_to[j] == bus_number[i]:
                     lines_in.append(self.flow_vars[j])
+            # for j in range(len(self.tie_flow)):
+            #     if tos[j] // 100 == line_to[0] // 100 and tos[j] % 100 == bus_number[i]:
+            #         lines_in.append(self.tie_flow[j])
             lines_out = []
             for j in range(len(line_from)):
                 if line_from[j] == bus_number[i]:
+                    lines_out.append(self.flow_vars[j])
+            # for j in range(len(self.tie_flow)):
+            #     if froms[j] // 100 == line_to[0] // 100 or froms[j] % 100 == bus_number[i]:
+            #         lines_out.append(self.flow_vars[j])
+            for j in range(len(self.internal)):
+                if self.internal[j] % 100 == bus_number[i]:
                     lines_out.append(self.flow_vars[j])
             # Need handles to this constraint
             constraint = LpConstraint(e=lpSum(lines_in) + lpSum(gens_on_bus) - lpSum(lines_out), rhs=self.loads[i])
             self.problem += constraint
             self.bus_constraints.append(constraint)
 
-        self.problem += lpSum([gen_costs[i] * self.gen_vars[i] for i in range(len(gen_ID))]) \
-                        + lpSum([self.alpha[i] * 2 * tie_X[i] * (self.theta[self.internal[i] % 100 - 1] -
-                                                                 self.tie_theta[i])]
+        self.problem += lpSum([gen_costs[i] * self.gen_vars[i] for i in range(len(gen_ID))]) + \
+                        lpSum([self.alpha[i] * 2 / self.tie_X[i] * (self.theta[self.internal[i] % 100 - 1] -
+                                                                    self.tie_theta[i])]
                                 for i in range(len(self.tie_theta)))
 
     def solve_it(self):
         self.problem.solve()
+        for i in range(len(self.tie_flow)):
+            print(self.tie_flow[i].value())
+            print(self.alpha)
 
     def data_dump(self):
         # Data dump
@@ -163,4 +190,8 @@ class Area:
         excel.close()
 
     def update_alpha(self, other_delta, iteration, A, B):
-        print('update_magic_here')
+        for i in range(len(self.alpha)):
+            k = 1/(A + iteration * B)
+            s = 2 / self.tie_X[i] * ((self.theta[self.internal[i] % 100 - 1].value() + other_delta[i].value() -
+                                      2 * self.tie_theta[i].value()))
+            self.alpha[i] += k * s
