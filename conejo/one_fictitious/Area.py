@@ -45,7 +45,7 @@ class Area:
                 self.internal.append(tos[i])
                 self.external.append(froms[i])
             self.tie_theta.append(LpVariable(name='tie_'+str(self.internal[i])+' to ' + str(self.external[i])))
-            self.tie_flow.append(LpVariable(name='tie_'+str(area)+':'+str(i)))
+            self.tie_flow.append(LpVariable(name='tie_F_'+str(area)+':'+str(i)))
             self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=.9 * tie_limits[i],
                                                                sense=LpConstraintLE))
             self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-.9 * tie_limits[i],
@@ -139,8 +139,10 @@ class Area:
             #     if froms[j] // 100 == line_to[0] // 100 or froms[j] % 100 == bus_number[i]:
             #         lines_out.append(self.flow_vars[j])
             for j in range(len(self.internal)):
-                if self.internal[j] % 100 == bus_number[i]:
-                    lines_out.append(self.flow_vars[j])
+                # I almost hope it isn't this simple...
+                # if self.internal[j] % 100 == bus_number[i]:
+                if self.internal[j] == bus_number[i]:
+                    lines_out.append(self.tie_flow[j])
             # Need handles to this constraint
             constraint = LpConstraint(e=lpSum(lines_in) + lpSum(gens_on_bus) - lpSum(lines_out), rhs=self.loads[i])
             self.problem += constraint
