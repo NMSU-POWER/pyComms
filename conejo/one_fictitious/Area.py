@@ -13,7 +13,7 @@ from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConst
 # Hold area problem for one area
 class Area:
     # Initialize the area using the provided data set.
-    def __init__(self, sheet_name, area):
+    def __init__(self, sheet_name, area, delta_dependent):
         self.AreaNum = area
         # Let's load the data and see what we have first.
         self.data_sheet = sheet_name
@@ -23,6 +23,8 @@ class Area:
         self.ties = pandas.read_excel(self.data_sheet, 'splice_lines')
         self.alpha = [100] * len(self.ties['From Bus'])
         self.area = area
+        self.delta_dependent = delta_dependent
+        self.delta_tied_vals = []
 
     def setup(self):
         # New variables
@@ -47,6 +49,10 @@ class Area:
                 self.internal.append(tos[i])
                 self.external.append(froms[i])
             self.tie_theta.append(LpVariable(name='tie_'+str(self.internal[i])+' to ' + str(self.external[i])))
+            # If we know this value is dependent of a previous value, we need to tie to it.
+            if self.delta_dependent[i]:
+                self.problem += self.tie_theta[i] == self.delta_tied_vals[i]
+                print('here')
             self.tie_flow.append(LpVariable(name='tie_F_'+str(self.area)+':'+str(i)))
             self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=.9 * tie_limits[i],
                                                                sense=LpConstraintLE))
@@ -164,7 +170,7 @@ class Area:
 
     def data_dump(self):
         # Data dump
-        excel = pd.ExcelWriter('output_test.xlsx')
+        excel = pd.ExcelWriter('output_test_a' + str(self.area) + '.xlsx')
         gen_prods = []
         for i in range(len(self.gen_vars)):
             gen_prods.append(self.gen_vars[i].value())

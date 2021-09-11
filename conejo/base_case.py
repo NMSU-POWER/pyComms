@@ -4,12 +4,10 @@
 # base_case.py
 # Solve the base case optimization, mostly so we can ensure that we have the proper result from the distributed version.
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-import time
 
 import pandas
 import pandas as pd
-from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConstraintGE, LpConstraintLE, LpConstraintEQ
-import numpy
+from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConstraintGE, LpConstraintLE
 
 busses_in_one = 24
 busses_in_two = 24
@@ -36,9 +34,10 @@ def calc_bus(from_, to_):
 problem = LpProblem(name='base_case', sense=LpMinimize)
 
 # Let's load the data and see what we have first.
-gens = pandas.read_excel('formatted_data.xlsx', 'gens')
-lines = pandas.read_excel('formatted_data.xlsx', 'lines')
-buses = pandas.read_excel('formatted_data.xlsx', 'busses')
+f_name = 'formatted_data_linemod.xlsx'
+gens = pandas.read_excel(f_name, 'gens')
+lines = pandas.read_excel(f_name, 'lines')
+buses = pandas.read_excel(f_name, 'busses')
 
 # We have data loaded, now we need to build our basic model
 # Objective: minimize cost of power produced
@@ -79,7 +78,6 @@ for i in range(len(flow_lim)):
 
 # We have B and a method for converting bus # to B matrix number.
 # Now we need to use the to/from busses for build the flow constraints
-Bsus = lines['B pu']
 line_constraints = []
 for i in range(len(flow_vars)):
     from_bus, to_bus = calc_bus(line_from[i], line_to[i])

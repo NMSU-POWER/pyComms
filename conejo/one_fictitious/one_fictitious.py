@@ -6,22 +6,45 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 from Area import Area
+from matplotlib import pyplot as plt
 
-A = 10
-B = 5
+A = .1
+B = .1
 
 if __name__ == '__main__':
-    a1 = Area('formatted_data1.xlsx', 1)
-    a2 = Area('formatted_data2.xlsx', 2)
-    a3 = Area('formatted_data3.xlsx', 3)
-
-    for i in range(10000):
+    a1 = Area('formatted_data1.xlsx', 1, [False, False, False, False])
+    a2 = Area('formatted_data2.xlsx', 2, [True, True, True, False])
+    a3 = Area('formatted_data3.xlsx', 3, [True, True])
+    a1_alpha = [[], [], [], []]
+    a2_alpha = [[], [], [], []]
+    a3_alpha = [[], []]
+    delta = [0, 0, 0, 0, 0]
+    index = []
+    for i in range(1):
+        index.append(i)
+        for j in range(len(a1.alpha)):
+            a1_alpha[j].append(a1.alpha[j])
+        a1.delta_tied_vals = [delta[0], delta[1], delta[2], delta[3]]
         a1.setup()
         a1.solve_it()
+        delta[0] = a1.tie_theta[0].value()
+        delta[1] = a1.tie_theta[1].value()
+        delta[2] = a1.tie_theta[2].value()
+        delta[3] = a1.tie_theta[3].value()
+
+        for j in range(len(a2.alpha)):
+            a2_alpha[j].append(a2.alpha[j])
+        a2.delta_tied_vals = [delta[0], delta[1], delta[2], delta[4]]
         a2.setup()
         a2.solve_it()
+        delta[4] = a2.tie_theta[3].value()
+
+        for j in range(len(a3.alpha)):
+            a3_alpha[j].append(a3.alpha[j])
+        a3.delta_tied_vals = [delta[3], delta[4]]
         a3.setup()
         a3.solve_it()
+
         # A1 update
         # a1_external = []
         # a1_other_tie = []
@@ -71,7 +94,27 @@ if __name__ == '__main__':
                         a3_other_flow.append(a1.tie_flow[k].value())
         a3.update_alpha(a3_other_flow, i, A, B)
 
-        print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
-                                        + a3.problem.objective.value()))
+        # print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
+        #                                 + a3.problem.objective.value()))
     # for i in range(len(a1.tie_flow)):
         # print(a1.tie_flow[i].value())
+    print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
+                                    + a3.problem.objective.value()))
+    print(delta)
+    a1.data_dump()
+    a2.data_dump()
+    a3.data_dump()
+    print(a1.alpha)
+    print(a2.alpha)
+    print(a3.alpha)
+    fig = plt.figure()
+    plt.subplot(2, 2, 1)
+    for i in range(len(a1_alpha)):
+        plt.plot(index, a1_alpha[i], label=i)
+    plt.subplot(2, 2, 2)
+    for i in range(len(a2_alpha)):
+        plt.plot(index, a2_alpha[i], label=i)
+    plt.subplot(2, 2, 3)
+    for i in range(len(a3_alpha)):
+        plt.plot(index, a3_alpha[i], label=i)
+    plt.show()
