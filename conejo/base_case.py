@@ -59,6 +59,7 @@ theta = []
 for i in range(len(loads)):
     theta.append(LpVariable('bus_' + str(i)))
 # problem += lpSum(gen_vars) == sum(loads)
+problem += theta[0] == 0
 
 # Let's get the flow limits set up
 flow_lim = lines['Conv MVA']
@@ -82,7 +83,7 @@ line_constraints = []
 for i in range(len(flow_vars)):
     from_bus, to_bus = calc_bus(line_from[i], line_to[i])
     constraint = LpConstraint(
-        e=100 * -1 / line_X[i] * (theta[to_bus - 1] - theta[from_bus - 1]) - flow_vars[i],
+        e=-100 / line_X[i] * (theta[to_bus - 1] - theta[from_bus - 1]) - flow_vars[i],
         rhs=0)
     problem += constraint
     line_constraints.append(constraint)
@@ -112,7 +113,6 @@ for i in range(len(bus_number)):
 
 # Solve the problem
 problem.solve()
-# print(problem)
 
 # Data dump
 excel = pd.ExcelWriter('output_test.xlsx')
