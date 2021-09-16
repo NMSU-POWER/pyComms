@@ -34,7 +34,7 @@ def calc_bus(from_, to_):
 problem = LpProblem(name='base_case', sense=LpMinimize)
 
 # Let's load the data and see what we have first.
-f_name = 'formatted_data_linemod.xlsx'
+f_name = 'formatted_data.xlsx'
 gens = pandas.read_excel(f_name, 'gens')
 lines = pandas.read_excel(f_name, 'lines')
 buses = pandas.read_excel(f_name, 'busses')

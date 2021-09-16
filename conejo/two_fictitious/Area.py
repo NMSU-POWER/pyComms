@@ -21,7 +21,8 @@ class Area:
         self.lines = pandas.read_excel(self.data_sheet, 'lines')
         self.buses = pandas.read_excel(self.data_sheet, 'busses')
         self.ties = pandas.read_excel(self.data_sheet, 'splice_lines')
-        self.alpha = [100] * len(self.ties['From Bus'])
+        self.Beta = [100] * len(self.ties['From Bus'])
+        self.gamma = [100] * len(self.ties['From Bus'])
         self.area = area
         self.delta_dependent = delta_dependent
         self.delta_tied_vals = []
@@ -57,8 +58,8 @@ class Area:
                                                                sense=LpConstraintLE))
             self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-.9 * self.tie_limits[i],
                                                               sense=LpConstraintGE))
-            # self.problem += self.tie_flow_constraints_low[i]
-            # self.problem += self.tie_flow_constraints_high[i]
+            self.problem += self.tie_flow_constraints_low[i]
+            self.problem += self.tie_flow_constraints_high[i]
 
         # We now have a theta for every tie line, as well as the flow variables, alpha for price and flow constraints
         # We should be completely ready to implement the new objective function.
@@ -114,7 +115,7 @@ class Area:
         self.tie_constraints = []
         for i in range(len(self.tie_flow)):
             # if tos[i] // 100 == area:
-            constraint = LpConstraint(e=-200/self.tie_X[i] *
+            constraint = LpConstraint(e=-300/self.tie_X[i] *
                                         (-self.tie_theta[i] + self.theta[self.internal[i] % 100 - 1])
                                         - self.tie_flow[i], rhs=0)
             # else:
@@ -151,7 +152,10 @@ class Area:
 
         self.gen_cost_modifier = self.gens['genCostFactor']
         self.problem += lpSum([self.gen_costs[i] * self.gen_vars[i] for i in range(len(gen_ID))]) + \
-                        lpSum([self.alpha[i] * self.tie_flow[i]] for i in range(len(self.tie_flow)))
+                        lpSum([self.Beta[i] * -300 / self.tie_X[i] *
+                               (self.theta[self.internal[i] % 100 - 1] -
+                                (2*self.Beta[i] - self.gamma[i]) / self.Beta[i] * self.tie_theta[i])
+                               for i in range(len(self.Beta))])
 
     def solve_it(self):
         # self.problem += lpSum([self.gen_costs[i] * self.gen_vars[i] for i in range(len(self.gen_vars))]) - \
@@ -192,11 +196,11 @@ class Area:
         excel.close()
 
     def update_alpha(self, other_flow, iteration, A, B):
-        for i in range(len(self.alpha)):
+        for i in range(len(self.Beta)):
             print(str(self.tie_flow[i].value()) + ':' + str(other_flow[i]))
         print()
-        for i in range(len(self.alpha)):
+        for i in range(len(self.Beta)):
             k = 1/(A + iteration * B)
             s = self.tie_flow[i].value() + other_flow[i]
             if s != 0:
-                self.alpha[i] += k * -s / abs(s)
+                self.Beta[i] += k * -s / abs(s)
