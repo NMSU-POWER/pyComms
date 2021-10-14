@@ -85,6 +85,10 @@ class Area:
             self.theta.append(LpVariable('bus_' + str(i)))
         if self.area == 1:
             self.problem += self.theta[0] == 0
+        if self.area == 2:
+            self.problem += self.theta[0] == -5.9091437
+        if self.area == 3:
+            self.problem += self.theta[0] == 14.084416
 
         # Let's get the flow limits set up
         self.flow_lim = self.lines['Conv MVA']
@@ -108,15 +112,15 @@ class Area:
         for i in range(len(self.flow_vars)):
             from_bus, to_bus = line_from[i] % 100, line_to[i] % 100
             constraint = LpConstraint(
-                e=-100 / line_X[i] * (self.theta[to_bus - 1] - self.theta[from_bus - 1]) - self.flow_vars[i],
+                e=-1 / line_X[i] * (self.theta[to_bus - 1] - self.theta[from_bus - 1]) - self.flow_vars[i],
                 rhs=0)
             self.problem += constraint
             self.line_constraints.append(constraint)
         self.tie_constraints = []
         for i in range(len(self.tie_flow)):
             # if tos[i] // 100 == area:
-            constraint = LpConstraint(e=-300/self.tie_X[i] *
-                                        (-self.tie_theta[i] + self.theta[self.internal[i] % 100 - 1])
+            constraint = LpConstraint(e=-3/self.tie_X[i] *
+                                        (self.theta[self.internal[i] % 100 - 1] - self.tie_theta[i])
                                         - self.tie_flow[i], rhs=0)
             # else:
             #     constraint = LpConstraint(e=100 * -1 / self.tie_X[i] * (-self.theta[tos[i] % 100 - 1] +
@@ -152,7 +156,7 @@ class Area:
 
         self.gen_cost_modifier = self.gens['genCostFactor']
         self.problem += lpSum([self.gen_costs[i] * self.gen_vars[i] for i in range(len(gen_ID))]) + \
-                        lpSum([self.Beta[i] * -300 / self.tie_X[i] *
+                        lpSum([self.Beta[i] * -3 / self.tie_X[i] *
                                (self.theta[self.internal[i] % 100 - 1] -
                                 (2*self.Beta[i] - self.gamma[i]) / self.Beta[i] * self.tie_theta[i])
                                for i in range(len(self.Beta))])

@@ -7,46 +7,49 @@
 
 from Area import Area
 from matplotlib import pyplot as plt
+import numpy as np
 
-A = .1
-B = .1
+A = 1000
+B = 500
 
 if __name__ == '__main__':
-    a1 = Area('formatted_data1.xlsx', 1, [False, False, False, False])
-    a2 = Area('formatted_data2.xlsx', 2, [True, False, False, False])
-    a3 = Area('formatted_data3.xlsx', 3, [True, False])
+    a1 = Area('3-bus_decoupled_1.xlsx', 1, [False, False, False, False])
+    a2 = Area('3-bus_decoupled_2.xlsx', 2, [True, False, False, False])
+    a3 = Area('3-bus_decoupled_3.xlsx', 3, [True, True])
     a1_alpha = [[], [], [], []]
     a2_alpha = [[], [], [], []]
     a3_alpha = [[], []]
-    delta = [0, 0, 0, 0, 0]
-    alpha = [100, 100, 100, 100, 100]
+    delta = [0, 0, 0]
+    alpha = [115.09, 112.356, 100, 100, 100]
     index = []
     for i in range(50):
         index.append(i)
         for j in range(len(a1.alpha)):
             a1_alpha[j].append(a1.alpha[j])
-        a1.delta_tied_vals = [delta[0], delta[1], delta[2], delta[3]]
+        #a1.delta_tied_vals = [delta[0], delta[1], delta[2], delta[3]]
         a1.setup()
         a1.solve_it()
         delta[0] = a1.tie_theta[0].value()
         delta[1] = a1.tie_theta[1].value()
-        delta[2] = a1.tie_theta[2].value()
-        delta[3] = a1.tie_theta[3].value()
+        #delta[2] = a1.tie_theta[2].value()
+        #delta[3] = a1.tie_theta[3].value()
 
         for j in range(len(a2.alpha)):
             a2_alpha[j].append(a2.alpha[j])
-        a2.delta_tied_vals = [delta[0], delta[1], delta[2], delta[4]]
+        #a2.delta_tied_vals = [delta[0], delta[1], delta[2], delta[4]]
+        a2.delta_tied_vals = [delta[0]]
         a2.setup()
         a2.solve_it()
-        delta[4] = a2.tie_theta[3].value()
+        delta[2] = a2.tie_theta[1].value()
+        #delta[4] = a2.tie_theta[3].value()
 
         for j in range(len(a3.alpha)):
             a3_alpha[j].append(a3.alpha[j])
-        a3.delta_tied_vals = [delta[3], delta[4]]
+        a3.delta_tied_vals = [delta[1], delta[2]]
         a3.setup()
         a3.solve_it()
 
-        a1_bus_theta = []
+        '''a1_bus_theta = []
         for j in range(len(a1.internal)):
             a1_bus_theta.append(a1.theta[a1.internal[j] % 100 - 1].value())
         a2_bus_theta = []
@@ -71,11 +74,23 @@ if __name__ == '__main__':
             alpha[3] += (1 / (A + B * i)) * -s / abs(s)
         s = a2_bus_theta[3] + a3_bus_theta[1] - 2 * delta[4]
         if s != 0:
-            alpha[4] += (1 / (A + B * i)) * -s / abs(s)
+            alpha[4] += (1 / (A + B * i)) * -s / abs(s)'''
+
+        k = 1/(A+B*i)
+        if a1.tie_flow[0].value() + a2.tie_flow[0].value() != 0:
+            alpha[0] = alpha[0] + (a1.tie_flow[0].value() + a2.tie_flow[0].value()) / abs(a1.tie_flow[0].value() + a2.tie_flow[0].value()) * k
+        # if a1.tie_flow[1].value() + a2.tie_flow[1].value() != 0:
+        #     alpha[1] = alpha[1] + (a1.tie_flow[1].value() + a2.tie_flow[1].value()) / abs(a1.tie_flow[1].value() + a2.tie_flow[1].value()) * k
+        a1.alpha = [alpha[0]]
+        a2.alpha = [alpha[0]]
+        '''alpha[1] = alpha[1] + (a1.tie_flow[1].value() + a2.tie_flow[1].value()) / np.sqrt(a1.tie_flow[1].value() ** 2 + a2.tie_flow[1].value() ** 2) * k
+        alpha[2] = alpha[2] + (a1.tie_flow[2].value() + a2.tie_flow[2].value()) / np.sqrt(a1.tie_flow[2].value() ** 2 + a2.tie_flow[2].value() ** 2) * k
+        alpha[3] = alpha[3] + (a1.tie_flow[3].value() + a3.tie_flow[0].value()) / np.sqrt(a1.tie_flow[3].value() ** 2 + a3.tie_flow[0].value() ** 2) * k
+        alpha[4] = alpha[4] + (a2.tie_flow[3].value() + a3.tie_flow[1].value()) / np.sqrt(a2.tie_flow[3].value() ** 2 + a3.tie_flow[1].value() ** 2) * k
 
         a1.alpha = [alpha[0], alpha[1], alpha[2], alpha[3]]
         a2.alpha = [alpha[0], alpha[1], alpha[2], alpha[4]]
-        a3.alpha = [alpha[3], alpha[4]]
+        a3.alpha = [alpha[3], alpha[4]]'''
 
         # print('Total objective: ' + str(a1.problem.objective.value() + a2.problem.objective.value()
         #                                 + a3.problem.objective.value()))
@@ -92,6 +107,12 @@ if __name__ == '__main__':
     print(a3.alpha)
     print()
     print(str(a1.tie_flow[0].value()) + ':' + str(a2.tie_flow[0].value()))
+    # print(str(a1.tie_flow[1].value()) + ':' + str(a2.tie_flow[1].value()))
+    fig = plt.figure()
+    plt.plot(index, a1_alpha[0])
+    # plt.plot(index, a1_alpha[1])
+    plt.show()
+    exit()
     print(str(a1.tie_flow[1].value()) + ':' + str(a2.tie_flow[1].value()))
     print(str(a1.tie_flow[2].value()) + ':' + str(a2.tie_flow[2].value()))
     print(str(a1.tie_flow[3].value()) + ':' + str(a3.tie_flow[0].value()))

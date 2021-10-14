@@ -9,9 +9,9 @@ import pandas
 import pandas as pd
 from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConstraintGE, LpConstraintLE
 
-busses_in_one = 24
-busses_in_two = 24
-busses_in_three = 25
+busses_in_one = 1
+busses_in_two = 1
+busses_in_three = 1
 
 def calc_bus(from_, to_):
     from_bus = from_
@@ -34,7 +34,7 @@ def calc_bus(from_, to_):
 problem = LpProblem(name='base_case', sense=LpMinimize)
 
 # Let's load the data and see what we have first.
-f_name = 'formatted_data.xlsx'
+f_name = 'formatted_data_original.xlsx'
 gens = pandas.read_excel(f_name, 'gens')
 lines = pandas.read_excel(f_name, 'lines')
 buses = pandas.read_excel(f_name, 'busses')
@@ -72,8 +72,8 @@ line_cap_constraint_high = []
 for i in range(len(flow_lim)):
     # flow_vars.append(LpVariable('flow_' + str(i), lowBound=-flow_lim[i], upBound=flow_lim[i]))
     flow_vars.append(LpVariable('flow_' + str(i)))
-    line_cap_constraint_low.append(LpConstraint(e=flow_vars[i], rhs=-1 * flow_lim[i] * .9, sense=LpConstraintGE))
-    line_cap_constraint_high.append(LpConstraint(e=flow_vars[i], rhs=flow_lim[i] * .9, sense=LpConstraintLE))
+    line_cap_constraint_low.append(LpConstraint(e=flow_vars[i], rhs=-1 * flow_lim[i], sense=LpConstraintGE))
+    line_cap_constraint_high.append(LpConstraint(e=flow_vars[i], rhs=flow_lim[i], sense=LpConstraintLE))
     problem += line_cap_constraint_low[i]
     problem += line_cap_constraint_high[i]
 
@@ -83,7 +83,7 @@ line_constraints = []
 for i in range(len(flow_vars)):
     from_bus, to_bus = calc_bus(line_from[i], line_to[i])
     constraint = LpConstraint(
-        e=-100 / line_X[i] * (theta[to_bus - 1] - theta[from_bus - 1]) - flow_vars[i],
+        e=-1 / line_X[i] * (theta[to_bus - 1] - theta[from_bus - 1]) - flow_vars[i],
         rhs=0)
     problem += constraint
     line_constraints.append(constraint)

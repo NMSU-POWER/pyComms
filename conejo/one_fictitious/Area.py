@@ -21,7 +21,7 @@ class Area:
         self.lines = pandas.read_excel(self.data_sheet, 'lines')
         self.buses = pandas.read_excel(self.data_sheet, 'busses')
         self.ties = pandas.read_excel(self.data_sheet, 'splice_lines')
-        self.alpha = [100] * len(self.ties['From Bus'])
+        self.alpha = [115.09, 112.356] # * len(self.ties['From Bus'])
         self.area = area
         self.delta_dependent = delta_dependent
         self.delta_tied_vals = []
@@ -42,7 +42,7 @@ class Area:
         self.internal = []
         self.external = []
         for i in range(len(froms)):
-            if froms[i] // 100 == self.lines['From Bus'][0] // 100:
+            if len(self.lines['From Bus']) > 0 and froms[i] // 100 == self.lines['From Bus'][0] // 100:
                 self.internal.append(froms[i])
                 self.external.append(tos[i])
             else:
@@ -53,12 +53,14 @@ class Area:
             if self.delta_dependent[i]:
                 self.problem += self.tie_theta[i] == self.delta_tied_vals[i]
             self.tie_flow.append(LpVariable(name='tie_F_'+str(self.area)+':'+str(i)))
-            self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=.9 * self.tie_limits[i],
+            self.tie_flow_constraints_high.append(LpConstraint(e=self.tie_flow[i], rhs=self.tie_limits[i],
                                                                sense=LpConstraintLE))
-            self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-.9 * self.tie_limits[i],
+            self.tie_flow_constraints_low.append(LpConstraint(e=self.tie_flow[i], rhs=-self.tie_limits[i],
                                                               sense=LpConstraintGE))
-            # self.problem += self.tie_flow_constraints_low[i]
-            # self.problem += self.tie_flow_constraints_high[i]
+            self.problem += self.tie_flow_constraints_low[i]
+            self.problem += self.tie_flow_constraints_high[i]
+        '''if self.area == 2:
+            self.problem += self.tie_flow[0] == 157.5'''
 
         # We now have a theta for every tie line, as well as the flow variables, alpha for price and flow constraints
         # We should be completely ready to implement the new objective function.
@@ -84,6 +86,10 @@ class Area:
             self.theta.append(LpVariable('bus_' + str(i)))
         if self.area == 1:
             self.problem += self.theta[0] == 0
+        '''if self.area == 2:
+            self.problem += self.theta[0] == -5.9091437
+        if self.area == 3:
+            self.problem += self.theta[0] == 14.084416'''
 
         # Let's get the flow limits set up
         self.flow_lim = self.lines['Conv MVA']
@@ -97,9 +103,9 @@ class Area:
             # flow_vars.append(LpVariable('flow_' + str(i), lowBound=-flow_lim[i], upBound=flow_lim[i]))
             self.flow_vars.append(LpVariable('flow_' + str(i)))
             self.line_cap_constraint_low.append(
-                LpConstraint(e=self.flow_vars[i], rhs=-1 * self.flow_lim[i] * .9, sense=LpConstraintGE))
-            self.line_cap_constraint_high.append(LpConstraint(e=self.flow_vars[i], rhs=self.flow_lim[i] *
-                                                                                       .9, sense=LpConstraintLE))
+                LpConstraint(e=self.flow_vars[i], rhs=-1 * self.flow_lim[i], sense=LpConstraintGE))
+            self.line_cap_constraint_high.append(LpConstraint(e=self.flow_vars[i], rhs=self.flow_lim[i],
+                                                              sense=LpConstraintLE))
             self.problem += self.line_cap_constraint_low[i]
             self.problem += self.line_cap_constraint_high[i]
 
@@ -107,14 +113,14 @@ class Area:
         for i in range(len(self.flow_vars)):
             from_bus, to_bus = line_from[i] % 100, line_to[i] % 100
             constraint = LpConstraint(
-                e=-100 / line_X[i] * (self.theta[to_bus - 1] - self.theta[from_bus - 1]) - self.flow_vars[i],
+                e=-1 / line_X[i] * (self.theta[to_bus - 1] - self.theta[from_bus - 1]) - self.flow_vars[i],
                 rhs=0)
             self.problem += constraint
             self.line_constraints.append(constraint)
         self.tie_constraints = []
         for i in range(len(self.tie_flow)):
             # if tos[i] // 100 == area:
-            constraint = LpConstraint(e=-200/self.tie_X[i] *
+            constraint = LpConstraint(e=-2/self.tie_X[i] *
                                         (-self.tie_theta[i] + self.theta[self.internal[i] % 100 - 1])
                                         - self.tie_flow[i], rhs=0)
             # else:
