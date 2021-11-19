@@ -4,17 +4,20 @@ from pulp import LpProblem, LpMinimize, lpSum, LpVariable, LpConstraint, LpConst
 
 problem = LpProblem(name='b-theta', sense=LpMinimize)
 
-f_name = 'formatted_data_new_method.xlsx'
+f_name = 'a.xlsx'
 gens = pandas.read_excel(f_name, 'gens')
 lines = pandas.read_excel(f_name, 'lines')
 buses = pandas.read_excel(f_name, 'busses')
 splices = pandas.read_excel(f_name, 'splice_lines')
 
+Betas = [106.6896333, 100.132514]
+Gammas = [105.7097067, 99.224348]
+
 # Bring in generator restrictions and the objective
 gen_vars = []
 for i in range(len(gens['ID #'])):
     gen_vars.append(LpVariable('gen'+str(i), lowBound=0, upBound=gens['Pmax'][i]))
-problem += lpSum([gen_vars[i] * gens['IC'][i] for i in range(len(gens['ID #']))])
+# problem += lpSum([gen_vars[i] * gens['IC'][i] for i in range(len(gens['ID #']))])
 
 # We need theta for every node
 bus_keys = {}
@@ -38,26 +41,34 @@ for i in range(len(lines['ID #'])):
 
 # We need tie thetas
 thetay = []
-thetaz = []
+# thetaz = []
 Btie = []
 for i in range(len(splices['ID #'])):
     Btie.append(-1/splices['X pu'][i])
     thetay.append(LpVariable(name='thetay'+splices['ID #'][i]))
-    thetaz.append(LpVariable(name='thetaz'+splices['ID #'][i]))
+    # thetaz.append(LpVariable(name='thetaz'+splices['ID #'][i]))
+
+# Bring in generator restrictions and the objective
+gen_vars = []
+for i in range(len(gens['ID #'])):
+    gen_vars.append(LpVariable('gen'+str(i), lowBound=0, upBound=gens['Pmax'][i]))
+problem += lpSum([gen_vars[i] * gens['IC'][i] for i in range(len(gens['ID #']))]) - \
+           lpSum([Betas[i] * (3*Btie[i]*(theta[bus_keys[splices['From Bus'][i]]] -
+                                         (2*Betas[i]-Gammas[i])/Betas[i]*thetay[i])) for i in range(len(splices['ID #']))])
 
 # We need to make the tie flow limits
 # Y side first
 flowgatey = []
 for i in range(len(splices['ID #'])):
-    low = LpConstraint(e=3 * Btie[i] * (theta[bus_keys[splices['From Bus'][i]]] - thetay[i]),
+    low = LpConstraint(e=-3 * Btie[i] * (theta[bus_keys[splices['From Bus'][i]]] - thetay[i]),
                        rhs=-splices['Conv MVA'][i]*.9, sense=LpConstraintGE)
-    high = LpConstraint(e=3 * Btie[i] * (theta[bus_keys[splices['From Bus'][i]]] - thetay[i]),
+    high = LpConstraint(e=-3 * Btie[i] * (theta[bus_keys[splices['From Bus'][i]]] - thetay[i]),
                         rhs=splices['Conv MVA'][i]*.9, sense=LpConstraintLE)
     flowgatey.append((low, high))
     problem += low
     problem += high
 # Z side now
-flowgatez = []
+'''flowgatez = []
 for i in range(len(splices['ID #'])):
     low = LpConstraint(e=3 * Btie[i]*(theta[bus_keys[splices['To Bus'][i]]] - thetaz[i]),
                        rhs=-splices['Conv MVA'][i]*.9, sense=LpConstraintGE)
@@ -65,16 +76,16 @@ for i in range(len(splices['ID #'])):
                         rhs=splices['Conv MVA'][i]*.9, sense=LpConstraintLE)
     flowgatez.append((low, high))
     problem += low
-    problem += high
+    problem += high'''
 
 # Beta/Gamma constraints
-Betas = []
+'''Betas = []
 Gammas = []
 for i in range(len(splices['ID #'])):
     Betas.append(LpConstraint(3 * Btie[i] * (theta[bus_keys[splices['From Bus'][i]]] - thetay[i]) + 3 * Btie[i] * (thetaz[i] - thetay[i])))
     Gammas.append(LpConstraint(3 * Btie[i] * (theta[bus_keys[splices['To Bus'][i]]] - thetaz[i]) + 3 * Btie[i] * (thetay[i] - thetaz[i])))
     problem += Betas[i]
-    problem += Gammas[i]
+    problem += Gammas[i]'''
 
 # LMP Data Gather
 lmp = []
@@ -95,9 +106,9 @@ for i in range(len(buses['Bus #'])):
     for j in range(len(splices['ID #'])):
         if buses['Bus #'][i] == splices['From Bus'][j]:
             tie_lines.append(3 * Btie[j] * (theta[bus_keys[buses['Bus #'][i]]] - thetay[j]))
-    for j in range(len(splices['ID #'])):
+    '''for j in range(len(splices['ID #'])):
         if buses['Bus #'][i] == splices['To Bus'][j]:
-            tie_lines.append(3 * Btie[j] * (theta[bus_keys[buses['Bus #'][i]]] - thetaz[j]))
+            tie_lines.append(3 * Btie[j] * (theta[bus_keys[buses['Bus #'][i]]] - thetaz[j]))'''
     lmp.append(LpConstraint(e=lpSum(gen_on_bus) + lpSum(incoming_lines) - lpSum(outgoing_lines) - lpSum(tie_lines),
                             rhs=buses['MW Load'][i], sense=LpConstraintEQ))
     problem += lmp[i]
@@ -142,11 +153,11 @@ for i in range(len(splices['ID #'])):
     to.append(splices['To Bus'][i])
     froms.append(splices['From Bus'][i])
     limits.append(splices['Conv MVA'][i])
-    flows_outer.append(B[i] * (theta[bus_keys[splices['To Bus'][i]]].value() - theta[bus_keys[splices['From Bus'][i]]].value()))
+    flows_outer.append(B[i] * (theta[bus_keys[splices['From Bus'][i]]].value() - thetay[i].value()))
     flowgatesy.append(flowgatey[i][0].pi + flowgatey[i][1].pi)
-    flowgatesz.append(flowgatez[i][0].pi + flowgatez[i][1].pi)
-    beta_vals.append(Betas[i].pi)
-    gamma_vals.append(Gammas[i].pi)
+    flowgatesz.append(0)
+    beta_vals.append(0)
+    gamma_vals.append(0)
 pd.DataFrame({'from': froms, 'to': to, 'limits': limits, 'Flow': flows_outer, 'flowgatesy': flowgatesy, 'flowgatesz': flowgatesz, 'beta': beta_vals, 'gamma': gamma_vals},
              columns=['from', 'to', 'limits', 'Flow', 'flowgatesy', 'flowgatesz', 'beta', 'gamma']).to_excel(excel, sheet_name='lines_splice')
 
